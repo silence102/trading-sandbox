@@ -16,6 +16,7 @@
 - [x] 한국투자증권 ISA 계좌 개설
 - [x] KIS Developers 실전투자 API Key 발급
 - [x] KIS Developers 모의투자 API Key 발급
+- [x] 2026년 1월 모의투자 완료 (**+9.29% 수익률**)
 
 ### 진행 중
 - [ ] eFriend Plus(HTS)를 활용한 실제 투자 진행
@@ -61,6 +62,9 @@ trading-sandbox/
 │   ├── api-comparison.md       # 증권사 API 비교
 │   ├── trading-systems.md      # HTS/MTS/WTS 비교
 │   └── github-issue-guide.md   # GitHub Issue 가이드
+├── results/                     # 📊 결과물 및 산출물
+│   ├── README.md               # 결과물 목록
+│   └── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
 └── notes/
     └── reports/                 # 📝 한국투자증권 리포트 분석 노트
         ├── README.md            # 리포트 기록 설명
@@ -74,6 +78,7 @@ trading-sandbox/
 | `hooks/` | **트리거 진입점** - 사용자 요청 시 Claude가 먼저 확인 |
 | `automation/` | 자동화 작업의 상세 절차 문서 |
 | `docs/` | 프로젝트 관련 조사 및 분석 문서 |
+| `results/` | 모의투자 결과, 산출물 등 결과물 관리 |
 | `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
 
 ### Claude 자동화 트리거
