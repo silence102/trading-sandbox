@@ -49,11 +49,41 @@
 ```
 trading-sandbox/
 ├── README.md                    # 본 문서
+├── hooks/                       # 🎯 트리거 진입점 (Claude 필수 확인)
+│   ├── README.md               # 트리거 목록
+│   ├── issue-log.md            # 이슈 로그 등록 트리거
+│   └── report-update.md        # 리포트 업데이트 트리거
+├── automation/                  # 🤖 자동화 작업 절차
+│   ├── README.md               # 자동화 목록
+│   └── github-issue-log.md     # 작업 로그 상세 절차
+├── docs/                        # 📚 조사 및 분석 문서
+│   ├── README.md               # 문서 목록
+│   ├── api-comparison.md       # 증권사 API 비교
+│   ├── trading-systems.md      # HTS/MTS/WTS 비교
+│   └── github-issue-guide.md   # GitHub Issue 가이드
 └── notes/
-    └── reports/                 # 한국투자증권 리포트 분석 노트
+    └── reports/                 # 📝 한국투자증권 리포트 분석 노트
         ├── README.md            # 리포트 기록 설명
         └── YY-MM-DD~DD_기록.pdf # 날짜별 수기 기록
 ```
+
+### 주요 폴더 설명
+
+| 폴더 | 설명 |
+|------|------|
+| `hooks/` | **트리거 진입점** - 사용자 요청 시 Claude가 먼저 확인 |
+| `automation/` | 자동화 작업의 상세 절차 문서 |
+| `docs/` | 프로젝트 관련 조사 및 분석 문서 |
+| `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
+
+### Claude 자동화 트리거
+
+| 사용자 요청 | 실행 작업 |
+|------------|----------|
+| "오늘 작업 이슈 로그 등록해줘" | GitHub Issue에 작업 로그 등록 |
+| "리포트 기록 업데이트해줘" | 새 리포트 OCR 후 README 업데이트 |
+
+> **Claude 참고**: 위 요청 시 `hooks/` 폴더의 해당 파일을 먼저 읽고 절차를 따릅니다.
 
 ## 5. 기록 예정 항목
 
