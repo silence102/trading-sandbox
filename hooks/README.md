@@ -24,6 +24,7 @@
 |------------|-----------|----------|
 | "오늘 작업 이슈 로그 등록해줘" | [issue-log.md](issue-log.md) | GitHub Issue에 작업 로그 등록 |
 | "리포트 기록 업데이트해줘" | [report-update.md](report-update.md) | 새 리포트 PDF OCR 후 README 업데이트 |
+| "커밋해줘" / "푸시해줘" | [commit.md](commit.md) | 커밋 컨벤션에 따라 커밋 및 푸시 |
 
 ---
 
@@ -33,11 +34,13 @@
 hooks/                      # 트리거 진입점
 ├── README.md              # 본 문서
 ├── issue-log.md           # 이슈 로그 등록 트리거
-└── report-update.md       # 리포트 업데이트 트리거
+├── report-update.md       # 리포트 업데이트 트리거
+└── commit.md              # 커밋/푸시 트리거
 
 automation/                 # 실제 작업 절차
 ├── README.md
-└── github-issue-log.md    # 이슈 로그 상세 절차
+├── github-issue-log.md    # 이슈 로그 상세 절차
+└── commit-convention.md   # 커밋 컨벤션 상세 가이드
 ```
 
 ---
