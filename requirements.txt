@@ -1,0 +1,21 @@
+# 한국투자증권 리서치 리포트 자동화
+# Python 3.11+
+
+# 웹 크롤링
+selenium>=4.15.0
+webdriver-manager>=4.0.1
+
+# PDF 처리
+PyMuPDF>=1.23.0
+
+# AI 요약
+anthropic>=0.18.0
+
+# 스케줄링
+schedule>=1.2.0
+
+# 환경변수
+python-dotenv>=1.0.0
+
+# 유틸리티
+requests>=2.31.0
