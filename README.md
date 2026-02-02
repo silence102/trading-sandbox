@@ -76,10 +76,12 @@ trading-sandbox/
 ├── results/                     # 📊 결과물 및 산출물
 │   ├── README.md               # 결과물 목록
 │   └── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
-└── notes/
-    └── reports/                 # 📝 한국투자증권 리포트 분석 노트
-        ├── README.md            # 리포트 기록 설명
-        └── YY-MM-DD~DD_기록.pdf # 날짜별 수기 기록
+├── notes/
+│   └── reports/                 # 📝 한국투자증권 리포트 분석 노트
+│       ├── README.md            # 리포트 기록 설명
+│       └── YY-MM-DD~DD_기록.pdf # 날짜별 수기 기록
+└── troubleshooting_log/         # 🔧 문제 해결 기록
+    └── YYYY-MM-DD_이슈명.md     # 날짜별 트러블슈팅 기록
 ```
 
 ### 주요 폴더 설명
@@ -91,6 +93,7 @@ trading-sandbox/
 | `docs/` | 프로젝트 관련 조사 및 분석 문서 |
 | `results/` | 모의투자 결과, 산출물 등 결과물 관리 |
 | `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
+| `troubleshooting_log/` | 문제 해결 시도 및 실패 기록 |
 
 ### Claude 자동화 트리거
 
@@ -116,4 +119,4 @@ trading-sandbox/
 
 ---
 
-*마지막 업데이트: 2026년 2월 2일*
+*마지막 업데이트: 2026년 2월 3일*

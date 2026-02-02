@@ -24,7 +24,6 @@
 |------------|-----------|----------|
 | "오늘 작업 이슈 로그 등록해줘" | [issue-log.md](issue-log.md) | GitHub Issue에 작업 로그 등록 |
 | "리포트 기록 업데이트해줘" | [report-update.md](report-update.md) | 새 리포트 PDF OCR 후 README 업데이트 |
-| "오늘 리서치 리포트 요약해줘" | [daily-report.md](daily-report.md) | 한투 리서치 크롤링 → AI 요약 |
 
 ---
 
@@ -34,18 +33,11 @@
 hooks/                      # 트리거 진입점
 ├── README.md              # 본 문서
 ├── issue-log.md           # 이슈 로그 등록 트리거
-├── report-update.md       # 리포트 업데이트 트리거
-└── daily-report.md        # 일일 리서치 리포트 자동 생성
+└── report-update.md       # 리포트 업데이트 트리거
 
 automation/                 # 실제 작업 절차
 ├── README.md
 └── github-issue-log.md    # 이슈 로그 상세 절차
-
-scripts/                    # 자동화 스크립트
-├── main.py                # 통합 파이프라인
-├── report_crawler.py      # 리서치 페이지 크롤러
-├── pdf_extractor.py       # PDF 텍스트 추출
-└── report_summarizer.py   # Claude API 요약
 ```
 
 ---
