@@ -29,7 +29,7 @@
 - [x] KIS Developers 모의투자 API Key 발급
 - [x] 2026년 1월 모의투자 완료 (**+9.29% 수익률**)
 - [x] eFriend Plus(HTS)를 활용한 실제 투자 진행
-- [x] 한국투자증권 리포트 분석 및 기록 (7개 파일, 01/08~01/28)
+- [x] 한국투자증권 리포트 분석 및 기록 (8개 파일, 01/08~01/31)
 - [x] 투자 과정에서의 문제점 및 개선 사항 도출
 
 ### 진행 중
@@ -99,9 +99,9 @@ trading-sandbox/
 │       └── pykrx-notice.md     # PyKRX 면책 및 저작권
 ├── results/                     # 📊 결과물 및 산출물
 │   ├── README.md               # 결과물 목록
-│   ├── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
-│   └── daily_briefing/         # 일일 마켓 브리핑
+│   └── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
 ├── notes/
+│   ├── daily_briefing/          # 📈 일일 마켓 브리핑
 │   ├── reports/                 # 📝 한국투자증권 리포트 분석 노트
 │   │   ├── README.md            # 리포트 기록 설명
 │   │   └── YY-MM-DD~DD_기록.pdf # 날짜별 수기 기록
@@ -121,7 +121,7 @@ trading-sandbox/
 | `automation/` | 자동화 작업의 상세 절차 문서 |
 | `docs/` | 프로젝트 관련 조사 및 분석 문서 |
 | `docs/references/` | **외부 라이브러리 주의사항** - 저작권, 이용약관 등 |
-| `results/` | 모의투자 결과, 일일 브리핑 등 결과물 관리 |
+| `results/` | 모의투자 결과 등 결과물 관리 |
 | `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
 | `notes/pain_points/` | **투자 문제점 및 개선 사항** - 기능 정의 기반 자료 |
 | `troubleshooting_log/` | 문제 해결 시도 및 실패 기록 |
