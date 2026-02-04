@@ -1,0 +1,119 @@
+# 일일 마켓 브리핑 자동 생성 워크플로우
+#
+# 사용법:
+#   1. GitHub 저장소 Settings > Secrets and variables > Actions에서 시크릿 추가
+#      - DART_API_KEY (선택)
+#      - ECOS_API_KEY (선택)
+#   2. Settings > Variables > Repository variables에서 변수 추가
+#      - BRIEFING_ENABLED: "true" (활성화) 또는 "false" (비활성화)
+#
+# 실행 시간: 한국시간 18:00 (UTC 09:00), 평일만
+
+name: Daily Market Briefing
+
+on:
+  # 스케줄 실행 (UTC 기준, 한국시간 -9시간)
+  schedule:
+    - cron: '0 9 * * 1-5'  # UTC 09:00 = KST 18:00, 월-금
+
+  # 수동 실행 허용
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'BRIEFING_ENABLED 설정 무시하고 강제 실행'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  check-enabled:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check if enabled
+        id: check
+        run: |
+          # 수동 실행에서 force_run이 true면 실행
+          if [ "${{ github.event.inputs.force_run }}" == "true" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "강제 실행 모드"
+            exit 0
+          fi
+
+          # BRIEFING_ENABLED 변수 확인 (기본값: false)
+          ENABLED="${{ vars.BRIEFING_ENABLED }}"
+          if [ "$ENABLED" == "true" ]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            echo "자동 실행 활성화됨"
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "자동 실행 비활성화됨 (BRIEFING_ENABLED=$ENABLED)"
+          fi
+
+  generate-briefing:
+    needs: check-enabled
+    if: needs.check-enabled.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create .env file
+        run: |
+          echo "DART_API_KEY=${{ secrets.DART_API_KEY }}" >> .env
+          echo "ECOS_API_KEY=${{ secrets.ECOS_API_KEY }}" >> .env
+          echo "WATCHLIST_STOCKS=005930,000660,035720" >> .env
+
+      - name: Generate market briefing
+        run: |
+          python scripts/main.py
+
+      - name: Get current date (KST)
+        id: date
+        run: |
+          echo "date=$(TZ='Asia/Seoul' date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+
+      - name: Commit and push briefing
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add results/daily_briefing/
+          git diff --staged --quiet || git commit -m "docs: 일일 마켓 브리핑 자동 생성 (${{ steps.date.outputs.date }})"
+          git push
+
+      - name: Summary
+        run: |
+          echo "## 마켓 브리핑 생성 완료" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- 날짜: ${{ steps.date.outputs.date }}" >> $GITHUB_STEP_SUMMARY
+          echo "- 파일: results/daily_briefing/${{ steps.date.outputs.date }}_마켓브리핑.md" >> $GITHUB_STEP_SUMMARY
+
+  skipped:
+    needs: check-enabled
+    if: needs.check-enabled.outputs.should_run == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skipped notice
+        run: |
+          echo "## 마켓 브리핑 건너뜀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "BRIEFING_ENABLED가 'true'로 설정되지 않았습니다." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "활성화하려면:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Settings > Secrets and variables > Actions > Variables 이동" >> $GITHUB_STEP_SUMMARY
+          echo "2. BRIEFING_ENABLED 변수를 'true'로 설정" >> $GITHUB_STEP_SUMMARY

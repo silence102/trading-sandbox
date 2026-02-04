@@ -25,6 +25,8 @@
 | "오늘 작업 이슈 로그 등록해줘" | [issue-log.md](issue-log.md) | GitHub Issue에 작업 로그 등록 |
 | "리포트 기록 업데이트해줘" | [report-update.md](report-update.md) | 새 리포트 PDF OCR 후 README 업데이트 |
 | "커밋해줘" / "푸시해줘" | [commit.md](commit.md) | 커밋 컨벤션에 따라 커밋 및 푸시 |
+| "마켓 브리핑 생성해줘" | [market-briefing.md](market-briefing.md) | 일일 마켓 브리핑 생성 |
+| "지금 시장 상황 알려줘" | [market-check.md](market-check.md) | 실시간 시세/뉴스 조회 |
 
 ---
 
@@ -35,7 +37,9 @@ hooks/                      # 트리거 진입점
 ├── README.md              # 본 문서
 ├── issue-log.md           # 이슈 로그 등록 트리거
 ├── report-update.md       # 리포트 업데이트 트리거
-└── commit.md              # 커밋/푸시 트리거
+├── commit.md              # 커밋/푸시 트리거
+├── market-briefing.md     # 마켓 브리핑 생성 트리거
+└── market-check.md        # 실시간 시장 조회 트리거
 
 automation/                 # 실제 작업 절차
 ├── README.md
@@ -45,4 +49,4 @@ automation/                 # 실제 작업 절차
 
 ---
 
-*마지막 업데이트: 2026년 2월 2일*
+*마지막 업데이트: 2026년 2월 4일*
