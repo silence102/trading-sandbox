@@ -1,0 +1,26 @@
+# 투자 정보 자동화 파이프라인 의존성
+# pip install -r requirements.txt
+
+# DART API (전자공시시스템)
+opendartreader>=0.2.0
+
+# KRX 주식 데이터
+pykrx>=1.0.0
+
+# RSS 뉴스 파싱
+feedparser>=6.0.0
+
+# HTTP 요청
+requests>=2.28.0
+
+# 환경변수 관리
+python-dotenv>=1.0.0
+
+# Claude API (AI 요약)
+anthropic>=0.18.0
+
+# 스케줄링
+schedule>=1.2.0
+
+# 데이터 처리
+pandas>=2.0.0

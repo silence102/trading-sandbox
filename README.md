@@ -56,11 +56,30 @@
 | HTS | eFriend Plus |
 | 계좌 | ISA 계좌 |
 
+### 데이터 수집 API
+
+| API | 용도 | 비용 |
+|-----|------|------|
+| [DART](https://opendart.fss.or.kr/) | 기업 공시, 재무제표 | 무료 |
+| [PyKRX](https://github.com/sharebook-kr/pykrx) | 주식 시세, 거래량 | 무료 |
+| [ECOS](https://ecos.bok.or.kr/api/) | 금리, 환율 등 경제지표 | 무료 |
+| 뉴스 RSS | 경제/금융 뉴스 | 무료 |
+
 ## 4. 프로젝트 구조
 
 ```
 trading-sandbox/
 ├── README.md                    # 본 문서
+├── scripts/                     # 🐍 자동화 파이프라인 (Python)
+│   ├── main.py                 # 메인 실행 파일
+│   ├── briefing_generator.py   # 일일 마켓 브리핑 생성기
+│   └── collectors/             # 데이터 수집기
+│       ├── dart_collector.py   # DART 공시 수집
+│       ├── krx_collector.py    # KRX 시세 수집
+│       ├── ecos_collector.py   # ECOS 경제지표 수집
+│       └── news_collector.py   # 뉴스 RSS 수집
+├── config/                      # ⚙️ 설정 파일
+│   └── settings.py             # API 키 및 설정
 ├── hooks/                       # 🎯 트리거 진입점 (Claude 필수 확인)
 │   ├── README.md               # 트리거 목록
 │   ├── issue-log.md            # 이슈 로그 등록 트리거
@@ -75,7 +94,8 @@ trading-sandbox/
 │   └── github-issue-guide.md   # GitHub Issue 가이드
 ├── results/                     # 📊 결과물 및 산출물
 │   ├── README.md               # 결과물 목록
-│   └── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
+│   ├── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
+│   └── daily_briefing/         # 일일 마켓 브리핑
 ├── notes/
 │   └── reports/                 # 📝 한국투자증권 리포트 분석 노트
 │       ├── README.md            # 리포트 기록 설명
@@ -88,10 +108,12 @@ trading-sandbox/
 
 | 폴더 | 설명 |
 |------|------|
+| `scripts/` | **자동화 파이프라인** - 일일 마켓 브리핑 생성 |
+| `config/` | API 키 및 설정 관리 |
 | `hooks/` | **트리거 진입점** - 사용자 요청 시 Claude가 먼저 확인 |
 | `automation/` | 자동화 작업의 상세 절차 문서 |
 | `docs/` | 프로젝트 관련 조사 및 분석 문서 |
-| `results/` | 모의투자 결과, 산출물 등 결과물 관리 |
+| `results/` | 모의투자 결과, 일일 브리핑 등 결과물 관리 |
 | `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
 | `troubleshooting_log/` | 문제 해결 시도 및 실패 기록 |
 
@@ -103,6 +125,25 @@ trading-sandbox/
 | "리포트 기록 업데이트해줘" | 새 리포트 OCR 후 README 업데이트 |
 
 > **Claude 참고**: 위 요청 시 `hooks/` 폴더의 해당 파일을 먼저 읽고 절차를 따릅니다.
+
+### 일일 마켓 브리핑 실행
+
+```bash
+# 의존성 설치
+pip install -r requirements.txt
+
+# .env 파일 생성 (API 키 설정)
+cp .env.example .env
+
+# 브리핑 생성
+python scripts/main.py
+
+# AI 분석 포함 브리핑
+python scripts/main.py --ai
+
+# 현재 설정 상태 확인
+python scripts/main.py --status
+```
 
 ## 5. 기록 예정 항목
 
@@ -119,4 +160,4 @@ trading-sandbox/
 
 ---
 
-*마지막 업데이트: 2026년 2월 3일*
+*마지막 업데이트: 2026년 2월 4일*
