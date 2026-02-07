@@ -10,7 +10,7 @@ load_dotenv()
 
 # 프로젝트 경로
 BASE_DIR = Path(__file__).parent.parent
-RESULTS_DIR = BASE_DIR / "results" / "daily_briefing"
+RESULTS_DIR = BASE_DIR / "notes" / "daily_briefing"
 
 # API 키
 DART_API_KEY = os.getenv("DART_API_KEY", "")
