@@ -16,8 +16,8 @@ requests>=2.28.0
 # 환경변수 관리
 python-dotenv>=1.0.0
 
-# Claude API (AI 요약)
-anthropic>=0.18.0
+# OpenAI API (AI 시장 분석)
+openai>=1.0.0
 
 # 스케줄링
 schedule>=1.2.0

@@ -21,7 +21,7 @@
 
 ## 1. 현재 단계
 
-> **기능 정의 단계** - 문제점 해결을 위한 기능 설계 중
+> **기능 구현 단계** - 일일 마켓 브리핑 자동화 파이프라인 가동 중
 
 ### 완료 항목
 - [x] 한국투자증권 ISA 계좌 개설
@@ -31,13 +31,19 @@
 - [x] eFriend Plus(HTS)를 활용한 실제 투자 진행
 - [x] 한국투자증권 리포트 분석 및 기록 (8개 파일, 01/08~01/31)
 - [x] 투자 과정에서의 문제점 및 개선 사항 도출
+- [x] 일일 마켓 브리핑 자동화 파이프라인 구축 (KRX + DART + ECOS + 뉴스 RSS)
+- [x] 모닝 / 애프터 마켓 이중 브리핑 체계 구현
+- [x] OpenAI GPT 기반 AI 시장 분석 연동 (ON/OFF 토글)
+- [x] GitHub Actions 자동 스케줄 설정 (모닝 08:00 / 애프터마켓 18:00)
 
 ### 진행 중
 - [ ] 투자 Pain Points 정리 및 문서화 → `notes/pain_points/`
 - [ ] 개발 기능 정의 및 자동화 대상 정리
 
 ### 예정
-- [ ] AI 에이전트 기반 문제 해결 및 구현
+- [ ] 공모주 일정 및 투자 자동화 → `plan/ipo-system.md`
+- [ ] KIS API 커스터마이징 → `plan/kis-api-customization.md`
+- [ ] AI 에이전트 기반 자동매매 시스템 개발
 - [ ] 모의투자 → 실전투자 단계적 적용
 
 ## 2. 로드맵
@@ -46,7 +52,7 @@
 |------|------|------|
 | **1. 문제 정의** | 실제 투자 경험 + 리포트 분석을 통한 개선점 도출 | ✅ 완료 |
 | **2. 기능 정의** | 자동화 대상 정리 및 개발 기능 명세 | 🔄 진행 중 |
-| **3. 구현** | AI 에이전트 기반 자동매매 시스템 개발 | ⏳ 예정 |
+| **3. 구현** | 일일 브리핑 자동화, AI 분석, 데이터 수집 파이프라인 | 🔄 진행 중 |
 | **4. 검증** | 모의투자 → 실전투자 단계적 적용 | ⏳ 예정 |
 
 ## 3. 기술 스택
@@ -57,119 +63,268 @@
 | API | KIS Developers (실전/모의) |
 | HTS | eFriend Plus |
 | 계좌 | ISA 계좌 |
+| 언어 | Python 3.12+ |
+| AI | OpenAI GPT (gpt-4o-mini) |
 
 ### 데이터 수집 API
 
-| API | 용도 | 비용 |
-|-----|------|------|
-| [DART](https://opendart.fss.or.kr/) | 기업 공시, 재무제표 | 무료 |
-| [PyKRX](https://github.com/sharebook-kr/pykrx) | 주식 시세, 거래량 | 무료 |
-| [ECOS](https://ecos.bok.or.kr/api/) | 금리, 환율 등 경제지표 | 무료 |
-| 뉴스 RSS | 경제/금융 뉴스 | 무료 |
+| API | 용도 | 상태 | 비용 |
+|-----|------|------|------|
+| [DART](https://opendart.fss.or.kr/) | 기업 공시, 재무제표 | ✅ 연동 완료 | 무료 |
+| [PyKRX](https://github.com/sharebook-kr/pykrx) | 주식 시세, 거래량, 지수 | ✅ 연동 완료 | 무료 |
+| [ECOS](https://ecos.bok.or.kr/api/) | 기준금리, 환율 등 경제지표 | ✅ 연동 완료 | 무료 |
+| 뉴스 RSS | 한국경제, 매일경제, 이데일리 | ✅ 연동 완료 | 무료 |
+| [OpenAI](https://platform.openai.com/) | AI 시장 분석 (GPT) | ✅ 연동 완료 | 유료 (ON/OFF) |
+
+---
 
 ## 4. 프로젝트 구조
 
 ```
 trading-sandbox/
+├── .env                         # 🔒 API 키 (git 제외)
+├── .env.example                 # API 키 템플릿
+├── .gitignore                   # git 제외 파일 설정
 ├── README.md                    # 본 문서
-├── scripts/                     # 🐍 자동화 파이프라인 (Python)
-│   ├── main.py                 # 메인 실행 파일
-│   ├── briefing_generator.py   # 일일 마켓 브리핑 생성기
-│   └── collectors/             # 데이터 수집기
-│       ├── dart_collector.py   # DART 공시 수집
-│       ├── krx_collector.py    # KRX 시세 수집
-│       ├── ecos_collector.py   # ECOS 경제지표 수집
-│       └── news_collector.py   # 뉴스 RSS 수집
-├── config/                      # ⚙️ 설정 파일
-│   └── settings.py             # API 키 및 설정
-├── hooks/                       # 🎯 트리거 진입점 (Claude 필수 확인)
-│   ├── README.md               # 트리거 목록
-│   ├── issue-log.md            # 이슈 로그 등록 트리거
-│   └── report-update.md        # 리포트 업데이트 트리거
+├── requirements.txt             # Python 의존성 목록
+│
+├── config/                      # ⚙️ 설정
+│   ├── __init__.py
+│   └── settings.py              # API 키, AI 설정, 브리핑 설정
+│
+├── scripts/                     # 🐍 자동화 파이프라인
+│   ├── __init__.py
+│   ├── main.py                  # CLI 진입점 (모닝/애프터마켓 브리핑)
+│   ├── briefing_generator.py    # 브리핑 생성기 + OpenAI AI 분석
+│   └── collectors/              # 데이터 수집기 모듈
+│       ├── __init__.py
+│       ├── dart_collector.py    # DART 공시 수집 (opendartreader)
+│       ├── krx_collector.py     # KRX 주식 시세/지수 수집 (pykrx)
+│       ├── ecos_collector.py    # ECOS 경제지표 수집 (한국은행)
+│       └── news_collector.py    # 뉴스 RSS 수집 (feedparser)
+│
+├── hooks/                       # 🎯 트리거 진입점 (Claude 자동 실행)
+│   ├── README.md
+│   ├── market-briefing.md       # "마켓 브리핑 생성해줘"
+│   ├── market-check.md          # "시장 상황 알려줘"
+│   ├── issue-log.md             # "이슈 로그 등록해줘"
+│   ├── report-update.md         # "리포트 기록 업데이트해줘"
+│   └── commit.md                # "커밋해줘" / "푸시해줘"
+│
 ├── automation/                  # 🤖 자동화 작업 절차
-│   ├── README.md               # 자동화 목록
-│   └── github-issue-log.md     # 작업 로그 상세 절차
-├── docs/                        # 📚 조사 및 분석 문서
-│   ├── README.md               # 문서 목록
-│   ├── learning/               # 📖 학습 자료
-│   │   ├── api-comparison.md   # 증권사 API 비교
-│   │   ├── trading-systems.md  # HTS/MTS/WTS 비교
-│   │   └── github-issue-guide.md # GitHub Issue 가이드
-│   └── references/             # ⚠️ 외부 라이브러리 주의사항
-│       └── pykrx-notice.md     # PyKRX 면책 및 저작권
-├── results/                     # 📊 결과물 및 산출물
-│   ├── README.md               # 결과물 목록
-│   └── 2026-01_모의투자_결과.md # 1월 모의투자 보고서
-├── notes/
-│   ├── daily_briefing/          # 📈 일일 마켓 브리핑
-│   ├── reports/                 # 📝 한국투자증권 리포트 분석 노트
-│   │   ├── README.md            # 리포트 기록 설명
-│   │   └── YY-MM-DD~DD_기록.pdf # 날짜별 수기 기록
+│   ├── README.md
+│   ├── github-issue-log.md      # GitHub Issue 작업 로그 절차
+│   └── commit-convention.md     # 커밋 컨벤션 가이드
+│
+├── plan/                        # 📋 개발 계획
+│   ├── README.md
+│   ├── daily-briefing-expansion.md  # 일일 브리핑 확장 계획
+│   ├── ipo-system.md                # 공모주 자동화 계획
+│   ├── pain-points-improvement.md   # 투자 불편 사항 개선
+│   └── kis-api-customization.md     # KIS API 커스터마이징
+│
+├── notes/                       # 📝 투자 기록 및 산출물
+│   ├── daily_briefing/          # 📈 일일 마켓 브리핑 (자동 생성)
+│   │   ├── YYYY-MM-DD_모닝브리핑.md
+│   │   └── YYYY-MM-DD_애프터마켓브리핑.md
+│   ├── reports/                 # 📄 증권사 리포트 분석 기록
+│   │   ├── README.md
+│   │   └── YY-MM-DD~DD_기록.pdf
 │   └── pain_points/             # 💡 투자 문제점 및 개선 사항
-│       └── README.md            # 기록 가이드
-└── troubleshooting_log/         # 🔧 문제 해결 기록
-    └── YYYY-MM-DD_이슈명.md     # 날짜별 트러블슈팅 기록
+│       └── README.md
+│
+├── docs/                        # 📚 학습 및 참고 문서
+│   ├── README.md
+│   ├── learning/                # 학습 자료
+│   │   ├── api-comparison.md    # 증권사 API 비교
+│   │   ├── trading-systems.md   # HTS/MTS/WTS 비교
+│   │   └── github-issue-guide.md
+│   └── references/              # 외부 라이브러리 주의사항
+│       └── pykrx-notice.md      # PyKRX 면책 및 저작권
+│
+├── results/                     # 📊 투자 결과물
+│   ├── README.md
+│   ├── 2026-01_모의투자_결과.md
+│   └── 1월_모의투자_결과.png
+│
+├── troubleshooting_log/         # 🔧 문제 해결 기록
+│   └── YYYY-MM-DD_이슈명.md
+│
+└── .github/
+    └── workflows/
+        └── daily-briefing.yml   # ⏰ GitHub Actions 자동 브리핑
 ```
 
-### 주요 폴더 설명
+---
 
-| 폴더 | 설명 |
+## 5. 폴더별 상세 설명
+
+### `config/` - 설정 관리
+
+| 파일 | 역할 |
 |------|------|
-| `scripts/` | **자동화 파이프라인** - 일일 마켓 브리핑 생성 |
-| `config/` | API 키 및 설정 관리 |
-| `hooks/` | **트리거 진입점** - 사용자 요청 시 Claude가 먼저 확인 |
-| `automation/` | 자동화 작업의 상세 절차 문서 |
-| `docs/` | 프로젝트 관련 조사 및 분석 문서 |
-| `docs/references/` | **외부 라이브러리 주의사항** - 저작권, 이용약관 등 |
-| `results/` | 모의투자 결과 등 결과물 관리 |
-| `notes/reports/` | 한국투자증권 리포트 수기 분석 기록 |
-| `notes/pain_points/` | **투자 문제점 및 개선 사항** - 기능 정의 기반 자료 |
-| `troubleshooting_log/` | 문제 해결 시도 및 실패 기록 |
+| `settings.py` | 모든 설정값의 중앙 관리 (API 키, AI 모델, 관심 종목, 브리핑 유형별 설정) |
 
-### Claude 자동화 트리거
+**주요 설정값:**
 
-| 사용자 요청 | 실행 작업 |
-|------------|----------|
-| "오늘 작업 이슈 로그 등록해줘" | GitHub Issue에 작업 로그 등록 |
-| "리포트 기록 업데이트해줘" | 새 리포트 OCR 후 README 업데이트 |
-| "마켓 브리핑 생성해줘" | 일일 마켓 브리핑 생성 (`scripts/main.py`) |
-| "지금 시장 상황 알려줘" | 실시간 시세/뉴스 조회 |
+| 설정 | 파일 | 설명 |
+|------|------|------|
+| API 키 (DART, ECOS, OpenAI) | `.env` | 환경변수로 관리, git 제외 |
+| AI ON/OFF | `.env` → `AI_ENABLED` | `true`/`false`, 유료 API이므로 기본 OFF |
+| AI 모델 | `settings.py` → `AI_MODEL` | 기본: `gpt-4o-mini` |
+| AI 응답 톤 | `settings.py` → `AI_TEMPERATURE` | 기본: 0.3 (낮을수록 일관적) |
+| 관심 종목 | `.env` → `WATCHLIST_STOCKS` | 쉼표 구분 종목코드 |
 
-> **Claude 참고**: 위 요청 시 `hooks/` 폴더의 해당 파일을 먼저 읽고 절차를 따릅니다.
+### `scripts/` - 자동화 파이프라인
 
-### 일일 마켓 브리핑 실행
+데이터 수집부터 브리핑 생성까지의 전체 파이프라인을 담당합니다.
 
-**수동 실행:**
-```bash
-# 의존성 설치
-pip install -r requirements.txt
-
-# .env 파일 생성 (API 키 설정)
-cp .env.example .env
-
-# 브리핑 생성
-python scripts/main.py
-
-# AI 분석 포함 브리핑
-python scripts/main.py --ai
-
-# 현재 설정 상태 확인
-python scripts/main.py --status
+**동작 흐름:**
+```
+main.py (CLI)
+  ↓ --type morning/aftermarket, --ai
+briefing_generator.py
+  ↓ 데이터 수집 요청
+collectors/ (DART + KRX + ECOS + News)
+  ↓ 수집 데이터 반환
+briefing_generator.py
+  ↓ 마크다운 브리핑 조립
+  ↓ (--ai 시) OpenAI GPT에 분석 요청
+notes/daily_briefing/YYYY-MM-DD_모닝브리핑.md 저장
 ```
 
-**GitHub Actions 자동 실행 (매일 18:00 KST):**
+| 파일 | 역할 |
+|------|------|
+| `main.py` | CLI 진입점. `--type`, `--ai`, `--status`, `--test`, `--schedule` 지원 |
+| `briefing_generator.py` | 수집 데이터 통합 → 모닝/애프터마켓 브리핑 생성 + AI 분석 |
+| `collectors/dart_collector.py` | DART API로 관심 종목 공시 수집 (opendartreader) |
+| `collectors/krx_collector.py` | KOSPI/KOSDAQ 지수 + 관심 종목 시세 수집 (pykrx) |
+| `collectors/ecos_collector.py` | 기준금리, 환율 등 경제지표 수집 (한국은행 ECOS) |
+| `collectors/news_collector.py` | 한국경제/매일경제/이데일리 RSS 뉴스 수집 |
 
-| 설정 | 값 | 설명 |
-|------|---|------|
-| 현재 상태 | **OFF** | 기본 비활성화 |
-| 활성화 방법 | `BRIEFING_ENABLED=true` | Repository Variable 설정 |
+### `hooks/` - Claude 트리거 진입점
+
+사용자의 특정 요청을 감지하면 Claude가 이 폴더의 파일을 먼저 읽고 절차를 따릅니다.
+
+| 사용자 요청 | Hook 파일 | 실행 작업 |
+|------------|-----------|----------|
+| "모닝 브리핑 생성해줘" | `market-briefing.md` | 모닝 브리핑 생성 |
+| "애프터 마켓 브리핑 생성해줘" | `market-briefing.md` | 애프터마켓 브리핑 생성 |
+| "지금 시장 상황 알려줘" | `market-check.md` | 실시간 시세/뉴스 조회 |
+| "이슈 로그 등록해줘" | `issue-log.md` | GitHub Issue에 작업 로그 등록 |
+| "리포트 기록 업데이트해줘" | `report-update.md` | 새 리포트 PDF OCR 후 README 업데이트 |
+| "커밋해줘" / "푸시해줘" | `commit.md` | 커밋 컨벤션에 따라 커밋 및 푸시 |
+
+### `plan/` - 개발 계획
+
+| 파일 | 주제 | 상태 |
+|------|------|------|
+| `daily-briefing-expansion.md` | 일일 브리핑 자동화 확장 | 🔄 진행 중 |
+| `ipo-system.md` | 공모주 일정 및 투자 자동화 | 📝 계획 중 |
+| `pain-points-improvement.md` | 투자 불편 사항 개선 | 📝 계획 중 |
+| `kis-api-customization.md` | 증권사 API 커스터마이징 | 📝 계획 중 |
+
+### `notes/` - 투자 기록 및 산출물
+
+| 하위 폴더 | 역할 |
+|-----------|------|
+| `daily_briefing/` | 자동 생성된 일일 마켓 브리핑 저장 (모닝/애프터마켓) |
+| `reports/` | 한국투자증권 리포트 수기 분석 기록 (PDF) |
+| `pain_points/` | 투자 중 겪은 문제점 및 개선 아이디어 |
+
+### `docs/` - 학습 및 참고 문서
+
+| 하위 폴더 | 역할 |
+|-----------|------|
+| `learning/` | 증권사 API 비교, HTS/MTS 비교 등 학습 자료 |
+| `references/` | 외부 라이브러리 주의사항 (PyKRX 면책 등) |
+
+### `.github/workflows/` - GitHub Actions 자동화
+
+`daily-briefing.yml`이 매일 자동으로 브리핑을 생성합니다.
+
+| 스케줄 | 시간 (KST) | 브리핑 유형 |
+|--------|-----------|------------|
+| `cron: '0 23 * * 0-4'` | 월~금 08:00 | 모닝 브리핑 |
+| `cron: '0 9 * * 1-5'` | 월~금 18:00 | 애프터마켓 브리핑 |
+
+현재 상태: **OFF** (기본 비활성화)
 
 활성화 방법:
 1. GitHub 저장소 → Settings → Secrets and variables → Actions
 2. Variables 탭에서 `BRIEFING_ENABLED` = `true` 추가
-3. (선택) Secrets에 `DART_API_KEY`, `ECOS_API_KEY` 추가
+3. (선택) Secrets에 `DART_API_KEY`, `ECOS_API_KEY`, `OPENAI_API_KEY` 추가
 
-## 5. 기록 예정 항목
+---
+
+## 6. 일일 마켓 브리핑
+
+### 브리핑 유형
+
+| 유형 | 시간 | 목적 | 데이터 기준 |
+|------|------|------|------------|
+| **모닝 브리핑** | 08:00 KST | 장 시작 전 투자 준비 | 전일 데이터 |
+| **애프터 마켓 브리핑** | 18:00 KST | 장 마감 후 시장 복기 | 당일 데이터 |
+
+### 브리핑 구성
+
+| 섹션 | 모닝 브리핑 | 애프터마켓 브리핑 | 데이터 소스 |
+|------|-----------|----------------|------------|
+| 1 | 전일 시장 마감 | 금일 시장 동향 | KRX (PyKRX) |
+| 2 | 환율 / 금리 | 거시경제 지표 | ECOS (한국은행) |
+| 3 | 주요 공시 | 금일 주요 공시 | DART |
+| 4 | 오전 주요 뉴스 | 오후 주요 뉴스 | 뉴스 RSS |
+| 5 | AI 시장 분석 (선택) | AI 시장 분석 (선택) | OpenAI GPT |
+
+### 실행 방법
+
+```bash
+# 의존성 설치
+pip install -r requirements.txt
+
+# .env 파일 생성 후 API 키 입력
+cp .env.example .env
+
+# 모닝 브리핑 생성
+python scripts/main.py --type morning
+
+# 애프터 마켓 브리핑 생성
+python scripts/main.py --type aftermarket
+
+# AI 분석 포함 (AI_ENABLED=true 필요)
+python scripts/main.py --type morning --ai
+
+# 현재 파이프라인 상태 확인
+python scripts/main.py --status
+
+# 개별 수집기 테스트
+python scripts/main.py --test dart
+python scripts/main.py --test krx
+python scripts/main.py --test ecos
+python scripts/main.py --test news
+```
+
+### AI 분석 설정
+
+OpenAI API는 유료이므로 **ON/OFF 이중 잠금** 방식으로 동작합니다.
+
+```
+AI 실행 조건: --ai 플래그 + AI_ENABLED=true (둘 다 충족 필요)
+```
+
+| 설정 | 위치 | 기본값 | 설명 |
+|------|------|--------|------|
+| AI ON/OFF | `.env` → `AI_ENABLED` | `false` | `true`로 변경 시 활성화 |
+| 모델 | `config/settings.py` → `AI_MODEL` | `gpt-4o-mini` | 비용 효율적 모델 |
+| 최대 토큰 | `config/settings.py` → `AI_MAX_TOKENS` | `1500` | 응답 길이 제한 |
+| 분석 톤 | `config/settings.py` → `AI_TEMPERATURE` | `0.3` | 낮을수록 일관적 |
+| 시스템 프롬프트 | `scripts/briefing_generator.py` | - | 한국 주식시장 애널리스트 역할 |
+| 모닝 프롬프트 | `scripts/briefing_generator.py` | - | 전일 요약 + 관전 포인트 + 전략 |
+| 애프터 프롬프트 | `scripts/briefing_generator.py` | - | 시장 총평 + 이슈 분석 + 내일 전략 |
+
+---
+
+## 7. 기록 예정 항목
 
 분석 완료 후 다음 내용을 추가할 예정입니다:
 - 프로젝트 기능 및 기술 상세
@@ -184,4 +339,4 @@ python scripts/main.py --status
 
 ---
 
-*마지막 업데이트: 2026년 2월 4일*
+*마지막 업데이트: 2026년 2월 9일*
