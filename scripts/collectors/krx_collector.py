@@ -78,7 +78,8 @@ class KrxCollector:
     def get_index_ohlcv(
         self,
         index_ticker: str = "1001",  # 1001=KOSPI, 2001=KOSDAQ
-        days_back: int = 7
+        days_back: int = 7,
+        target_date: Optional[str] = None
     ) -> list[dict]:
         """
         지수 OHLCV 조회
@@ -86,6 +87,7 @@ class KrxCollector:
         Args:
             index_ticker: 지수 코드 (1001=KOSPI, 2001=KOSDAQ)
             days_back: 며칠 전 데이터까지
+            target_date: 조회 기준 날짜 (YYYYMMDD). None이면 오늘
 
         Returns:
             지수 OHLCV 데이터
@@ -93,8 +95,13 @@ class KrxCollector:
         if not self.is_available():
             return []
 
-        end_date = datetime.now().strftime("%Y%m%d")
-        start_date = (datetime.now() - timedelta(days=days_back)).strftime("%Y%m%d")
+        if target_date:
+            base = datetime.strptime(target_date, "%Y%m%d")
+        else:
+            base = datetime.now()
+
+        end_date = base.strftime("%Y%m%d")
+        start_date = (base - timedelta(days=days_back)).strftime("%Y%m%d")
 
         try:
             df = stock.get_index_ohlcv(start_date, end_date, index_ticker)
@@ -147,23 +154,28 @@ class KrxCollector:
         except Exception:
             return ticker
 
-    def get_watchlist_data(self, days_back: int = 1) -> list[dict]:
+    def get_watchlist_data(self, target_date: Optional[str] = None) -> list[dict]:
         """
         관심 종목의 최근 시세 조회
 
         Args:
-            days_back: 며칠 전 데이터까지
+            target_date: 조회 기준 날짜 (YYYYMMDD). None이면 최근 영업일
 
         Returns:
             관심 종목 시세 데이터
         """
         results = []
 
+        if target_date:
+            base = datetime.strptime(target_date, "%Y%m%d")
+        else:
+            base = datetime.now()
+
         for ticker in WATCHLIST_STOCKS:
             ohlcv = self.get_market_ohlcv(
                 ticker,
-                start_date=(datetime.now() - timedelta(days=days_back + 5)).strftime("%Y%m%d"),
-                end_date=datetime.now().strftime("%Y%m%d")
+                start_date=(base - timedelta(days=7)).strftime("%Y%m%d"),
+                end_date=base.strftime("%Y%m%d")
             )
 
             if ohlcv:
@@ -181,21 +193,29 @@ class KrxCollector:
 
         return results
 
-    def get_market_summary(self) -> dict:
+    def get_market_summary(self, target_date: Optional[str] = None) -> dict:
         """
         시장 전체 요약 (KOSPI, KOSDAQ)
+
+        Args:
+            target_date: 조회 기준 날짜 (YYYYMMDD). None이면 최근 영업일
 
         Returns:
             시장 요약 데이터
         """
+        if target_date:
+            base = datetime.strptime(target_date, "%Y%m%d")
+        else:
+            base = datetime.now()
+
         summary = {
             "kospi": {},
             "kosdaq": {},
-            "date": datetime.now().strftime("%Y-%m-%d"),
+            "date": base.strftime("%Y-%m-%d"),
         }
 
         # KOSPI 지수
-        kospi = self.get_index_ohlcv("1001", days_back=3)
+        kospi = self.get_index_ohlcv("1001", days_back=5, target_date=target_date)
         if kospi:
             latest = kospi[-1]
             prev = kospi[-2] if len(kospi) > 1 else latest
@@ -206,7 +226,7 @@ class KrxCollector:
             }
 
         # KOSDAQ 지수
-        kosdaq = self.get_index_ohlcv("2001", days_back=3)
+        kosdaq = self.get_index_ohlcv("2001", days_back=5, target_date=target_date)
         if kosdaq:
             latest = kosdaq[-1]
             prev = kosdaq[-2] if len(kosdaq) > 1 else latest
@@ -218,9 +238,12 @@ class KrxCollector:
 
         return summary
 
-    def format_for_briefing(self) -> str:
+    def format_for_briefing(self, target_date: Optional[str] = None) -> str:
         """
         브리핑용 마크다운 포맷 생성
+
+        Args:
+            target_date: 조회 기준 날짜 (YYYYMMDD). None이면 최근 영업일
 
         Returns:
             마크다운 문자열
@@ -228,7 +251,7 @@ class KrxCollector:
         lines = []
 
         # 시장 요약
-        summary = self.get_market_summary()
+        summary = self.get_market_summary(target_date=target_date)
         kospi = summary.get("kospi", {})
         kosdaq = summary.get("kosdaq", {})
 
@@ -249,7 +272,7 @@ class KrxCollector:
             )
 
         # 관심 종목
-        watchlist = self.get_watchlist_data()
+        watchlist = self.get_watchlist_data(target_date=target_date)
         if watchlist:
             lines.append("\n### 관심 종목")
             for item in watchlist:

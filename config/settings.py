@@ -15,7 +15,13 @@ RESULTS_DIR = BASE_DIR / "notes" / "daily_briefing"
 # API 키
 DART_API_KEY = os.getenv("DART_API_KEY", "")
 ECOS_API_KEY = os.getenv("ECOS_API_KEY", "")
-ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# AI 분석 설정
+AI_ENABLED = os.getenv("AI_ENABLED", "false").lower() == "true"
+AI_MODEL = "gpt-4o-mini"  # 비용 효율적 모델 (변경 가능: gpt-4o, gpt-4-turbo 등)
+AI_MAX_TOKENS = 1500
+AI_TEMPERATURE = 0.3  # 낮을수록 일관된 분석, 높을수록 창의적
 
 # 관심 종목 리스트
 WATCHLIST_STOCKS = os.getenv("WATCHLIST_STOCKS", "005930,000660").split(",")
@@ -34,9 +40,24 @@ ECOS_STAT_CODES = {
     "코스피지수": "802Y001",    # KOSPI 지수
 }
 
-# 브리핑 생성 설정
+# 브리핑 유형별 설정
 BRIEFING_SETTINGS = {
-    "max_disclosures": 20,      # 최대 공시 개수
-    "max_news": 10,             # 최대 뉴스 개수
-    "days_back": 1,             # 몇 일 전 데이터까지
+    "morning": {
+        "max_disclosures": 20,
+        "max_news": 10,
+        "news_max_hours": 16,       # 전일 오후 ~ 당일 오전 뉴스
+        "days_back": 1,             # 전일 데이터
+        "title": "모닝 브리핑",
+        "file_suffix": "모닝브리핑",
+        "description": "장 시작 전 투자 준비",
+    },
+    "aftermarket": {
+        "max_disclosures": 20,
+        "max_news": 10,
+        "news_max_hours": 12,       # 당일 뉴스
+        "days_back": 0,             # 당일 데이터
+        "title": "애프터 마켓 브리핑",
+        "file_suffix": "애프터마켓브리핑",
+        "description": "금일 시장 마감 요약",
+    },
 }

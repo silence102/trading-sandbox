@@ -3,13 +3,14 @@
 투자 정보 자동화 파이프라인 - 메인 실행 파일
 
 사용법:
-    # 기본 브리핑 생성 (AI 없이)
+    # 모닝 브리핑 생성 (장 시작 전)
+    python main.py --type morning
+
+    # 애프터 마켓 브리핑 생성 (장 마감 후, 기본값)
+    python main.py --type aftermarket
     python main.py
 
-    # AI 분석 포함 브리핑 생성
-    python main.py --ai
-
-    # 스케줄러로 자동 실행
+    # 스케줄러로 자동 실행 (08:00 모닝, 18:00 애프터마켓)
     python main.py --schedule
 
     # 개별 수집기 테스트
@@ -29,15 +30,15 @@ from briefing_generator import BriefingGenerator
 from collectors import DartCollector, KrxCollector, EcosCollector, NewsCollector
 
 
-def run_briefing(use_ai: bool = False):
+def run_briefing(briefing_type: str = "aftermarket", use_ai: bool = False):
     """브리핑 생성 실행"""
     generator = BriefingGenerator()
-    filepath = generator.generate_and_save(use_ai=use_ai)
+    filepath = generator.generate_and_save(briefing_type=briefing_type, use_ai=use_ai)
     print(f"\n완료! 파일 위치: {filepath}")
 
 
 def run_scheduler():
-    """스케줄러로 자동 실행"""
+    """스케줄러로 자동 실행 (모닝 08:00, 애프터마켓 18:00)"""
     try:
         import schedule
         import time
@@ -46,18 +47,22 @@ def run_scheduler():
         print("설치: pip install schedule")
         return
 
-    def job():
-        print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 브리핑 생성 시작...")
-        run_briefing(use_ai=False)
+    def morning_job():
+        print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 모닝 브리핑 생성 시작...")
+        run_briefing(briefing_type="morning")
 
-    # 매일 18:00에 실행
-    schedule.every().day.at("18:00").do(job)
+    def aftermarket_job():
+        print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 애프터 마켓 브리핑 생성 시작...")
+        run_briefing(briefing_type="aftermarket")
 
-    print("스케줄러 시작 (매일 18:00에 브리핑 생성)")
+    # 매일 08:00 모닝, 18:00 애프터마켓
+    schedule.every().day.at("08:00").do(morning_job)
+    schedule.every().day.at("18:00").do(aftermarket_job)
+
+    print("스케줄러 시작")
+    print("  - 08:00 모닝 브리핑")
+    print("  - 18:00 애프터 마켓 브리핑")
     print("종료하려면 Ctrl+C를 누르세요.\n")
-
-    # 즉시 한 번 실행
-    job()
 
     while True:
         schedule.run_pending()
@@ -123,32 +128,29 @@ def show_status():
 
     # DART
     dart = DartCollector()
-    dart_status = "✓ 사용 가능" if dart.is_available() else "✗ API 키 필요"
+    dart_status = "[O] 사용 가능" if dart.is_available() else "[X] API 키 필요"
     print(f"DART (전자공시): {dart_status}")
 
     # KRX
     krx = KrxCollector()
-    krx_status = "✓ 사용 가능" if krx.is_available() else "✗ PyKRX 설치 필요"
+    krx_status = "[O] 사용 가능" if krx.is_available() else "[X] PyKRX 설치 필요"
     print(f"KRX (주식시세): {krx_status}")
 
     # ECOS
     ecos = EcosCollector()
-    ecos_status = "✓ 사용 가능" if ecos.is_available() else "✗ API 키 필요"
+    ecos_status = "[O] 사용 가능" if ecos.is_available() else "[X] API 키 필요"
     print(f"ECOS (경제지표): {ecos_status}")
 
     # News
     news = NewsCollector()
-    news_status = "✓ 사용 가능" if news.is_available() else "✗ feedparser 설치 필요"
+    news_status = "[O] 사용 가능" if news.is_available() else "[X] feedparser 설치 필요"
     print(f"뉴스 RSS: {news_status}")
 
-    # Anthropic
-    try:
-        import anthropic
-        from config import ANTHROPIC_API_KEY
-        ai_status = "✓ 사용 가능" if ANTHROPIC_API_KEY else "✗ API 키 필요"
-    except ImportError:
-        ai_status = "✗ anthropic 설치 필요"
-    print(f"Claude AI: {ai_status}")
+    # OpenAI
+    from config import OPENAI_API_KEY, AI_ENABLED, AI_MODEL
+    ai_key_ok = "[O]" if OPENAI_API_KEY else "[X]"
+    ai_on_off = "ON" if AI_ENABLED else "OFF"
+    print(f"OpenAI (ChatGPT): {ai_key_ok} API 키 {'등록됨' if OPENAI_API_KEY else '필요'} | AI 분석: {ai_on_off} | 모델: {AI_MODEL}")
 
     print("\n---")
     print("설정 방법: .env.example을 .env로 복사 후 API 키 입력")
@@ -160,23 +162,32 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 예시:
-  python main.py              기본 브리핑 생성
-  python main.py --ai         AI 분석 포함 브리핑
-  python main.py --schedule   스케줄러로 자동 실행
-  python main.py --test dart  DART 수집기 테스트
-  python main.py --status     현재 설정 상태 확인
+  python main.py                          애프터 마켓 브리핑 생성 (기본)
+  python main.py --type morning           모닝 브리핑 생성
+  python main.py --type aftermarket       애프터 마켓 브리핑 생성
+  python main.py --type morning --ai      AI 분석 포함 모닝 브리핑
+  python main.py --schedule               스케줄러로 자동 실행
+  python main.py --test dart              DART 수집기 테스트
+  python main.py --status                 현재 설정 상태 확인
         """
     )
 
     parser.add_argument(
+        "--type",
+        type=str,
+        choices=["morning", "aftermarket"],
+        default="aftermarket",
+        help="브리핑 유형: morning(모닝) 또는 aftermarket(애프터마켓, 기본값)"
+    )
+    parser.add_argument(
         "--ai",
         action="store_true",
-        help="Claude AI 분석 포함"
+        help="AI 분석 포함"
     )
     parser.add_argument(
         "--schedule",
         action="store_true",
-        help="스케줄러로 자동 실행 (매일 18:00)"
+        help="스케줄러로 자동 실행 (08:00 모닝 / 18:00 애프터마켓)"
     )
     parser.add_argument(
         "--test",
@@ -199,7 +210,7 @@ def main():
     elif args.schedule:
         run_scheduler()
     else:
-        run_briefing(use_ai=args.ai)
+        run_briefing(briefing_type=args.type, use_ai=args.ai)
 
 
 if __name__ == "__main__":

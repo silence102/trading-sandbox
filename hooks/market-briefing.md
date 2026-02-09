@@ -2,37 +2,39 @@
 
 ## 트리거 요청
 
-- "오늘 시장 브리핑 생성해줘"
-- "마켓 브리핑 만들어줘"
-- "일일 브리핑 생성해줘"
+- "모닝 브리핑 생성해줘" → morning 타입
+- "애프터 마켓 브리핑 생성해줘" → aftermarket 타입
+- "오늘 시장 브리핑 생성해줘" → 시간대에 따라 자동 판단
+- "마켓 브리핑 만들어줘" → 시간대에 따라 자동 판단
 
 ---
 
-## 실행 흐름
+## 브리핑 유형
 
-```
-1. [hooks/market-briefing.md] 읽기 (현재 문서)
-      ↓
-2. scripts/main.py 실행
-      ↓
-3. 데이터 수집 (KRX, 뉴스 RSS, DART, ECOS)
-      ↓
-4. 브리핑 파일 생성 → results/daily_briefing/
-```
+| 유형 | 시간 | 목적 | 데이터 기준 |
+|------|------|------|------------|
+| **모닝 브리핑** | 08:00 KST | 장 시작 전 투자 준비 | 전일 데이터 |
+| **애프터 마켓 브리핑** | 18:00 KST | 장 마감 후 시장 요약 | 금일 데이터 |
 
 ---
 
 ## 실행 방법
 
-### 기본 브리핑 (AI 분석 없이)
+### 모닝 브리핑 (장 시작 전)
 ```bash
 cd "c:\Users\robin\OneDrive\바탕 화면\trading-sandbox\trading-sandbox"
-python scripts/main.py
+python scripts/main.py --type morning
 ```
 
-### AI 분석 포함 브리핑
+### 애프터 마켓 브리핑 (장 마감 후)
 ```bash
-python scripts/main.py --ai
+python scripts/main.py --type aftermarket
+```
+
+### AI 분석 포함
+```bash
+python scripts/main.py --type morning --ai
+python scripts/main.py --type aftermarket --ai
 ```
 
 ---
@@ -51,23 +53,27 @@ python scripts/main.py --ai
 ## 결과물 위치
 
 ```
-results/daily_briefing/
-└── YYYY-MM-DD_마켓브리핑.md
+notes/daily_briefing/
+├── YYYY-MM-DD_모닝브리핑.md
+└── YYYY-MM-DD_애프터마켓브리핑.md
 ```
 
 ---
 
 ## Claude 실행 절차
 
-1. 위 bash 명령어 실행
-2. 생성된 브리핑 파일 내용 사용자에게 요약 전달
-3. 파일 경로 안내
+1. 사용자의 요청이 모닝/애프터마켓 중 어느 타입인지 판단
+   - 명시적으로 지정한 경우 해당 타입 사용
+   - 지정하지 않은 경우: 현재 시간이 12:00 KST 이전이면 morning, 이후이면 aftermarket
+2. 해당 타입으로 bash 명령어 실행
+3. 생성된 브리핑 파일 내용 사용자에게 요약 전달
+4. 파일 경로 안내
 
 ---
 
 ## GitHub Actions 자동 실행
 
-매일 18:00 (KST)에 자동으로 브리핑을 생성하고 저장소에 커밋합니다.
+매일 **08:00 모닝** / **18:00 애프터마켓** (KST) 자동 생성
 
 ### 현재 상태: **OFF** (기본값)
 
@@ -76,14 +82,9 @@ results/daily_briefing/
 2. **Variables** 탭 클릭
 3. `BRIEFING_ENABLED` = `true` 추가
 
-### API 키 설정 (선택)
-Secrets 탭에서 추가:
-- `DART_API_KEY`: DART 공시 수집용
-- `ECOS_API_KEY`: 한국은행 경제지표용
-
 ### 수동 실행
-Actions 탭 → Daily Market Briefing → Run workflow → `force_run: true` 선택
+Actions 탭 → Daily Market Briefing → Run workflow → 브리핑 유형 선택
 
 ---
 
-*마지막 업데이트: 2026년 2월 4일*
+*마지막 업데이트: 2026년 2월 9일*

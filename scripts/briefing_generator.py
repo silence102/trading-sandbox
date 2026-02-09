@@ -1,66 +1,104 @@
 """
 일일 마켓 브리핑 생성기
 
-수집된 데이터를 통합하여 일일 마켓 브리핑을 생성합니다.
-Claude API를 사용하여 AI 기반 분석 및 요약을 제공합니다.
+수집된 데이터를 통합하여 모닝/애프터마켓 브리핑을 생성합니다.
+- 모닝 브리핑 (08:00): 전일 종가, 환율/금리, 오전 뉴스
+- 애프터 마켓 브리핑 (18:00): 금일 시장 동향, 공시, 오후 뉴스
 """
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 # 프로젝트 루트 경로 추가
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-try:
-    import anthropic
-    ANTHROPIC_AVAILABLE = True
-except ImportError:
-    ANTHROPIC_AVAILABLE = False
-    print("Warning: anthropic not installed. Run: pip install anthropic")
-
-from config import ANTHROPIC_API_KEY, RESULTS_DIR, BRIEFING_SETTINGS
+from config import (
+    OPENAI_API_KEY, RESULTS_DIR, BRIEFING_SETTINGS,
+    AI_ENABLED, AI_MODEL, AI_MAX_TOKENS, AI_TEMPERATURE,
+)
 from collectors import DartCollector, KrxCollector, EcosCollector, NewsCollector
+
+# AI 분석용 시스템 프롬프트
+AI_SYSTEM_PROMPT = """당신은 한국 주식시장 전문 애널리스트입니다.
+수집된 시장 데이터를 바탕으로 간결하고 실용적인 투자 인사이트를 제공합니다.
+
+분석 원칙:
+1. 객관적 데이터 기반 분석 (감정적 표현 지양)
+2. 핵심 포인트 3~5개로 요약
+3. 관심 종목에 대한 단기 시사점 포함
+4. 거시경제 지표와 시장 흐름의 연관성 분석
+5. 면책 조항이나 "투자 판단은 본인 책임" 같은 문구는 절대 포함하지 마세요 (별도로 추가됨)
+
+출력 형식: 마크다운 (## 소제목 사용)"""
+
+AI_MORNING_PROMPT = """아래는 오늘 모닝 브리핑을 위해 수집된 시장 데이터입니다.
+
+{briefing_data}
+
+위 데이터를 바탕으로 다음을 분석해주세요:
+1. **전일 시장 요약**: 주요 지수 움직임과 의미
+2. **오늘의 관전 포인트**: 장 시작 전 주목할 이슈 2~3가지
+3. **관심 종목 시사점**: 관심 종목별 단기 전망
+4. **투자 전략 제안**: 오늘 장에서 고려할 전략
+
+간결하게 핵심만 작성해주세요."""
+
+AI_AFTERMARKET_PROMPT = """아래는 오늘 애프터 마켓 브리핑을 위해 수집된 시장 데이터입니다.
+
+{briefing_data}
+
+위 데이터를 바탕으로 다음을 분석해주세요:
+1. **금일 시장 총평**: 장중 흐름과 마감 평가
+2. **주요 이슈 분석**: 시장에 영향을 준 핵심 이벤트
+3. **관심 종목 리뷰**: 관심 종목 금일 성과 분석
+4. **내일 전략**: 내일 장에 대비할 포인트
+
+간결하게 핵심만 작성해주세요."""
 
 
 class BriefingGenerator:
     """일일 마켓 브리핑 생성기"""
 
-    def __init__(self, api_key: Optional[str] = None):
-        """
-        Args:
-            api_key: Anthropic API 키. None이면 환경변수에서 로드
-        """
-        self.api_key = api_key or ANTHROPIC_API_KEY
-        self.client = None
-
-        if ANTHROPIC_AVAILABLE and self.api_key:
-            self.client = anthropic.Anthropic(api_key=self.api_key)
-
+    def __init__(self):
         # 데이터 수집기 초기화
         self.dart = DartCollector()
         self.krx = KrxCollector()
         self.ecos = EcosCollector()
         self.news = NewsCollector()
 
-    def collect_all_data(self) -> dict:
+    def collect_all_data(self, briefing_type: str = "aftermarket") -> dict:
         """
         모든 데이터 수집
+
+        Args:
+            briefing_type: "morning" 또는 "aftermarket"
 
         Returns:
             수집된 데이터 dict
         """
+        settings = BRIEFING_SETTINGS[briefing_type]
         data = {
             "date": datetime.now().strftime("%Y-%m-%d"),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "briefing_type": briefing_type,
             "sections": {}
         }
+
+        # KRX 대상 날짜 결정
+        if briefing_type == "morning":
+            yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+            krx_target_date = yesterday
+        else:
+            krx_target_date = datetime.now().strftime("%Y%m%d")
+
+        dart_days_back = settings["days_back"]
 
         # DART 공시
         print("  - DART 공시 수집 중...")
         if self.dart.is_available():
-            disclosures = self.dart.get_recent_disclosures(days_back=1)
-            watchlist_disc = self.dart.get_watchlist_disclosures(days_back=1)
+            disclosures = self.dart.get_recent_disclosures(days_back=dart_days_back)
+            watchlist_disc = self.dart.get_watchlist_disclosures(days_back=dart_days_back)
             data["sections"]["dart"] = {
                 "all_disclosures": len(disclosures),
                 "watchlist_disclosures": watchlist_disc,
@@ -73,9 +111,9 @@ class BriefingGenerator:
         print("  - KRX 시세 수집 중...")
         if self.krx.is_available():
             data["sections"]["krx"] = {
-                "market_summary": self.krx.get_market_summary(),
-                "watchlist": self.krx.get_watchlist_data(),
-                "formatted": self.krx.format_for_briefing()
+                "market_summary": self.krx.get_market_summary(target_date=krx_target_date),
+                "watchlist": self.krx.get_watchlist_data(target_date=krx_target_date),
+                "formatted": self.krx.format_for_briefing(target_date=krx_target_date)
             }
         else:
             data["sections"]["krx"] = {"formatted": "PyKRX가 설치되지 않았습니다."}
@@ -93,11 +131,13 @@ class BriefingGenerator:
         # 뉴스
         print("  - 뉴스 RSS 수집 중...")
         if self.news.is_available():
-            news_items = self.news.get_investment_news(max_hours=24)
+            news_hours = settings["news_max_hours"]
+            max_news = settings["max_news"]
+            news_items = self.news.get_investment_news(max_hours=news_hours)
             data["sections"]["news"] = {
                 "count": len(news_items),
-                "items": news_items[:BRIEFING_SETTINGS["max_news"]],
-                "formatted": self.news.format_for_briefing(BRIEFING_SETTINGS["max_news"])
+                "items": news_items[:max_news],
+                "formatted": self.news.format_for_briefing(max_news, max_hours=news_hours)
             }
         else:
             data["sections"]["news"] = {"formatted": "feedparser가 설치되지 않았습니다."}
@@ -114,21 +154,32 @@ class BriefingGenerator:
         Returns:
             마크다운 브리핑 문자열
         """
-        sections = data.get("sections", {})
+        briefing_type = data.get("briefing_type", "aftermarket")
 
-        briefing = f"""# 일일 마켓 브리핑
+        if briefing_type == "morning":
+            return self._generate_morning_briefing(data)
+        else:
+            return self._generate_aftermarket_briefing(data)
+
+    def _generate_morning_briefing(self, data: dict) -> str:
+        """모닝 브리핑 템플릿"""
+        sections = data.get("sections", {})
+        settings = BRIEFING_SETTINGS["morning"]
+
+        return f"""# {settings['title']}
 
 **생성일시**: {data.get('timestamp', '')}
+**목적**: {settings['description']}
 
 ---
 
-## 1. 시장 동향
+## 1. 전일 시장 마감
 
 {sections.get('krx', {}).get('formatted', '데이터 없음')}
 
 ---
 
-## 2. 거시경제 지표
+## 2. 환율 / 금리
 
 {sections.get('ecos', {}).get('formatted', '데이터 없음')}
 
@@ -140,103 +191,165 @@ class BriefingGenerator:
 
 ---
 
-## 4. 주요 뉴스
+## 4. 오전 주요 뉴스
 
 {sections.get('news', {}).get('formatted', '데이터 없음')}
 
 ---
 
-*본 브리핑은 자동 생성되었습니다. 투자 판단은 본인 책임 하에 이루어져야 합니다.*
+*본 모닝 브리핑은 자동 생성되었습니다. 투자 판단은 본인 책임 하에 이루어져야 합니다.*
 """
-        return briefing
 
-    def generate_ai_briefing(self, data: dict) -> str:
+    def _generate_aftermarket_briefing(self, data: dict) -> str:
+        """애프터 마켓 브리핑 템플릿"""
+        sections = data.get("sections", {})
+        settings = BRIEFING_SETTINGS["aftermarket"]
+
+        return f"""# {settings['title']}
+
+**생성일시**: {data.get('timestamp', '')}
+**목적**: {settings['description']}
+
+---
+
+## 1. 금일 시장 동향
+
+{sections.get('krx', {}).get('formatted', '데이터 없음')}
+
+---
+
+## 2. 거시경제 지표
+
+{sections.get('ecos', {}).get('formatted', '데이터 없음')}
+
+---
+
+## 3. 금일 주요 공시 (DART)
+
+{sections.get('dart', {}).get('formatted', '데이터 없음')}
+
+---
+
+## 4. 오후 주요 뉴스
+
+{sections.get('news', {}).get('formatted', '데이터 없음')}
+
+---
+
+*본 애프터 마켓 브리핑은 자동 생성되었습니다. 투자 판단은 본인 책임 하에 이루어져야 합니다.*
+"""
+
+    def generate_ai_analysis(self, briefing: str, briefing_type: str) -> str:
         """
-        AI 기반 브리핑 생성 (Claude API 사용)
+        OpenAI API를 사용한 AI 분석 생성
 
         Args:
-            data: 수집된 데이터
+            briefing: 기본 브리핑 텍스트
+            briefing_type: "morning" 또는 "aftermarket"
 
         Returns:
-            AI 분석이 포함된 마크다운 브리핑
+            AI 분석 마크다운 문자열
         """
-        if not self.client:
-            print("Claude API를 사용할 수 없습니다. 기본 브리핑을 생성합니다.")
-            return self.generate_basic_briefing(data)
+        if not AI_ENABLED:
+            return ""
 
-        # 기본 브리핑 먼저 생성
-        basic_briefing = self.generate_basic_briefing(data)
-
-        # AI 분석 요청
-        prompt = f"""다음은 오늘의 시장 데이터입니다. 이를 바탕으로 간결한 투자 포인트를 3-5개 정리해주세요.
-
-{basic_briefing}
-
-## 요청사항:
-1. 오늘 시장의 핵심 포인트 3-5개
-2. 관심 종목 관련 주요 이슈 (있다면)
-3. 주의해야 할 리스크 요인 (있다면)
-
-간결하고 실용적으로 작성해주세요. 마크다운 형식으로 출력해주세요."""
+        if not OPENAI_API_KEY:
+            print("  [AI] OpenAI API 키가 설정되지 않았습니다.")
+            return ""
 
         try:
-            message = self.client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=1000,
+            from openai import OpenAI
+
+            client = OpenAI(api_key=OPENAI_API_KEY)
+
+            # 브리핑 유형별 프롬프트 선택
+            if briefing_type == "morning":
+                user_prompt = AI_MORNING_PROMPT.format(briefing_data=briefing)
+            else:
+                user_prompt = AI_AFTERMARKET_PROMPT.format(briefing_data=briefing)
+
+            print(f"  [AI] {AI_MODEL} 모델로 분석 요청 중...")
+
+            response = client.chat.completions.create(
+                model=AI_MODEL,
                 messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                    {"role": "system", "content": AI_SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                max_tokens=AI_MAX_TOKENS,
+                temperature=AI_TEMPERATURE,
             )
 
-            ai_analysis = message.content[0].text
+            analysis = response.choices[0].message.content
+            tokens_used = response.usage.total_tokens if response.usage else "N/A"
+            print(f"  [AI] 분석 완료 (토큰 사용: {tokens_used})")
 
-            # AI 분석을 기본 브리핑에 추가
-            final_briefing = f"""{basic_briefing}
-
----
-
-## 5. AI 분석 요약
-
-{ai_analysis}
+            return f"""
 
 ---
 
-*AI 분석은 Claude (Anthropic)에 의해 생성되었습니다.*
+## 5. AI 시장 분석
+
+> 모델: `{AI_MODEL}` | 토큰: {tokens_used}
+
+{analysis}
 """
-            return final_briefing
 
+        except ImportError:
+            print("  [AI] openai 라이브러리가 설치되지 않았습니다. pip install openai")
+            return ""
         except Exception as e:
-            print(f"AI 분석 생성 오류: {e}")
-            return basic_briefing
+            print(f"  [AI] 분석 오류: {e}")
+            return ""
 
-    def generate_and_save(self, use_ai: bool = False) -> str:
+    def generate_and_save(self, briefing_type: str = "aftermarket", use_ai: bool = False) -> str:
         """
         브리핑 생성 및 저장
 
         Args:
-            use_ai: AI 분석 사용 여부
+            briefing_type: "morning" 또는 "aftermarket"
+            use_ai: AI 분석 사용 여부 (--ai 플래그). AI_ENABLED=true일 때만 실제 동작
 
         Returns:
             저장된 파일 경로
         """
-        print("브리핑 생성 시작...")
+        settings = BRIEFING_SETTINGS[briefing_type]
+        print(f"{settings['title']} 생성 시작...")
 
         # 데이터 수집
         print("1. 데이터 수집 중...")
-        data = self.collect_all_data()
+        data = self.collect_all_data(briefing_type=briefing_type)
 
         # 브리핑 생성
         print("2. 브리핑 생성 중...")
+        briefing = self.generate_basic_briefing(data)
+
+        # AI 분석 (use_ai 플래그 + AI_ENABLED 설정 모두 필요)
+        ai_section = ""
         if use_ai:
-            briefing = self.generate_ai_briefing(data)
-        else:
-            briefing = self.generate_basic_briefing(data)
+            if AI_ENABLED:
+                print("3. AI 분석 생성 중...")
+                ai_section = self.generate_ai_analysis(briefing, briefing_type)
+            else:
+                print("3. AI 분석 건너뜀 (AI_ENABLED=false)")
+                print("   활성화: .env 파일에서 AI_ENABLED=true로 변경")
+
+        # AI 분석을 면책조항 바로 앞에 삽입
+        if ai_section:
+            # "---\n\n*본 " 패턴을 찾아 그 앞에 AI 분석 삽입
+            marker = "\n---\n\n*본 "
+            if marker in briefing:
+                idx = briefing.rfind(marker)
+                briefing = briefing[:idx] + ai_section + briefing[idx:]
+            else:
+                briefing += ai_section
 
         # 파일 저장
-        print("3. 파일 저장 중...")
+        step_num = "4" if use_ai else "3"
+        print(f"{step_num}. 파일 저장 중...")
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-        filename = f"{data['date']}_마켓브리핑.md"
+        filename = f"{data['date']}_{settings['file_suffix']}.md"
         filepath = RESULTS_DIR / filename
 
         with open(filepath, "w", encoding="utf-8") as f:
@@ -252,9 +365,6 @@ if __name__ == "__main__":
 
     print("=== 브리핑 생성 테스트 ===\n")
 
-    # 기본 브리핑 (AI 없이)
-    filepath = generator.generate_and_save(use_ai=False)
-
+    # 모닝 브리핑
+    filepath = generator.generate_and_save(briefing_type="morning")
     print(f"\n생성된 파일: {filepath}")
-    print("\nAI 분석을 포함하려면 use_ai=True로 실행하세요.")
-    print("(ANTHROPIC_API_KEY 설정 필요)")

@@ -141,12 +141,13 @@ class NewsCollector:
         investment_news.sort(key=lambda x: x.get("published", ""), reverse=True)
         return investment_news
 
-    def format_for_briefing(self, max_items: int = 10) -> str:
+    def format_for_briefing(self, max_items: int = 10, max_hours: int = 24) -> str:
         """
         브리핑용 마크다운 포맷 생성
 
         Args:
             max_items: 최대 표시 개수
+            max_hours: 최근 몇 시간 이내 뉴스
 
         Returns:
             마크다운 문자열
@@ -156,7 +157,7 @@ class NewsCollector:
         if not self.is_available():
             return "feedparser가 설치되지 않았습니다. pip install feedparser"
 
-        news = self.get_investment_news(max_hours=24)
+        news = self.get_investment_news(max_hours=max_hours)
 
         if not news:
             return "최근 투자 관련 뉴스가 없습니다."
