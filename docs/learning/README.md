@@ -11,7 +11,9 @@
 | [api-comparison.md](api-comparison.md) | 증권사 API 비교 분석 |
 | [trading-systems.md](trading-systems.md) | HTS/MTS/WTS 비교 분석 |
 | [github-issue-guide.md](github-issue-guide.md) | GitHub Issue 활용 가이드 |
+| [claude-code-remote.md](claude-code-remote.md) | Claude Code 모바일 원격 제어 가이드 |
+| [claude-code-rate-limit.md](claude-code-rate-limit.md) | Claude Code 사용량 리미트 관리 및 알림 가이드 |
 
 ---
 
-*생성일: 2026년 2월 4일*
+*마지막 업데이트: 2026년 2월 9일*
