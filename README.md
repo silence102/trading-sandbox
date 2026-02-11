@@ -112,11 +112,13 @@ trading-sandbox/
 │   ├── market-check.md          # "시장 상황 알려줘"
 │   ├── issue-log.md             # "이슈 로그 등록해줘"
 │   ├── report-update.md         # "리포트 기록 업데이트해줘"
+│   ├── readme-update.md         # "README 업데이트해줘"
 │   └── commit.md                # "커밋해줘" / "푸시해줘"
 │
-├── automation/                  # 🤖 로컬 자동화 스크립트
+├── automation/                  # 🤖 로컬 자동화 절차 문서
 │   ├── README.md
-│   └── github-issue-log.md      # GitHub Issue 작업 로그 절차
+│   ├── github-issue-log.md      # GitHub Issue 작업 로그 절차
+│   └── readme-update.md         # README.md 구조 최신화 절차
 │
 ├── plan/                        # 📋 개발 계획 (우선순위순 번호 파일명)
 │   ├── README.md                # 전체 실행 로드맵 + 우선순위 가이드
@@ -131,6 +133,7 @@ trading-sandbox/
 │   │   ├── YYYY-MM-DD_모닝브리핑.md
 │   │   ├── YYYY-MM-DD_미드데이브리핑.md
 │   │   └── YYYY-MM-DD_애프터마켓브리핑.md
+│   ├── watchlist.md             # 관심 종목 목록 + 변경 이력
 │   ├── reports/                 # 📄 증권사 리포트 분석 기록
 │   │   ├── README.md
 │   │   └── YY-MM-DD~DD_기록.pdf
@@ -145,7 +148,8 @@ trading-sandbox/
 │   │   ├── github-issue-guide.md          # GitHub Issue 가이드
 │   │   ├── structured-outputs-guide.md    # OpenAI Structured Outputs 활용
 │   │   ├── claude-code-skills-guide.md    # Claude Code Skills 인사이트
-│   │   └── claude-opus4-agent-teams.md    # Claude Opus 4.6 & Agent Teams
+│   │   ├── claude-opus4-agent-teams.md    # Claude Opus 4.6 & Agent Teams
+│   │   └── github-auto-push-guide.md      # GitHub 자동 업로드 원리
 │   └── references/              # 외부 라이브러리 주의사항
 │       └── pykrx-notice.md      # PyKRX 면책 및 저작권
 │
@@ -189,6 +193,7 @@ GitHub Actions (cron) 또는 python scripts/main.py --type X
   ├── ecos_collector.py   →  기준금리, 환율(원/달러·엔·위안·파운드) (ECOS + FRED)
   ├── dart_collector.py   →  관심 종목 공시 (DART API)
   └── news_collector.py   →  뉴스 헤드라인 (한국경제/매일경제/이데일리 RSS)
+        │                  ※ 관심 종목 목록 → notes/watchlist.md 참고
         │
         ▼
 [briefing_generator.py — 브리핑 조립]
@@ -205,18 +210,6 @@ GitHub Actions (cron) 또는 python scripts/main.py --type X
   git commit -m "docs: XX 브리핑 자동 생성 (YYYY-MM-DD)"
   git push → GitHub 저장소에 브리핑 파일 누적
 ```
-
-### 관심 종목 (WATCHLIST_STOCKS)
-
-| 종목코드 | 종목명 | 업종 |
-|----------|--------|------|
-| 005930 | 삼성전자 | 반도체/전자 |
-| 000660 | SK하이닉스 | 반도체 |
-| 016360 | 삼성증권 | 금융 |
-| 316140 | 우리금융지주 | 금융 |
-| 003230 | 삼양식품 | 식품 |
-| 161390 | 한국타이어앤테크놀로지 | 자동차부품 |
-| 002790 | 아모레퍼시픽 | 화장품 |
 
 ### 자동화 인프라 레이어 구조
 

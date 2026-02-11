@@ -12,7 +12,9 @@ docs/
 │   ├── trading-systems.md # HTS/MTS/WTS 비교
 │   ├── github-issue-guide.md # GitHub Issue 가이드
 │   ├── structured-outputs-guide.md # OpenAI Structured Outputs 활용
-│   └── claude-code-skills-guide.md # Claude Code Skills 생태계 인사이트
+│   ├── claude-code-skills-guide.md # Claude Code Skills 생태계 인사이트
+│   ├── claude-opus4-agent-teams.md # Claude Opus 4.6 & Agent Teams
+│   └── github-auto-push-guide.md   # GitHub 자동 업로드 원리
 └── references/            # ⚠️ 참고 자료 및 주의사항
     └── pykrx-notice.md    # PyKRX 면책 및 저작권
 ```
@@ -36,6 +38,7 @@ docs/
 | [structured-outputs-guide.md](learning/structured-outputs-guide.md) | OpenAI Structured Outputs 활용 가이드 |
 | [claude-code-skills-guide.md](learning/claude-code-skills-guide.md) | Claude Code Skills 생태계 및 프로젝트 적용 인사이트 |
 | [claude-opus4-agent-teams.md](learning/claude-opus4-agent-teams.md) | Claude Opus 4.6 & Agent Teams 핵심 정리 |
+| [github-auto-push-guide.md](learning/github-auto-push-guide.md) | GitHub 자동 업로드 원리 (Claude Code push vs GitHub Actions) |
 
 ## references/ - 참고 자료
 

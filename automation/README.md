@@ -11,13 +11,15 @@
 | 파일 | 트리거 요청 | 설명 |
 |------|------------|------|
 | [github-issue-log.md](github-issue-log.md) | "오늘 작업 이슈 로그 등록해줘" | 작업 로그를 GitHub Issue에 등록 |
+| [readme-update.md](readme-update.md) | "README 업데이트해줘" | 프로젝트 구조 변경 시 README.md 최신화 |
 
 ## 폴더 구조
 
 ```
 automation/
 ├── README.md              # 본 문서 (자동화 목록)
-└── github-issue-log.md    # GitHub Issue 작업 로그 자동화
+├── github-issue-log.md    # GitHub Issue 작업 로그 자동화
+└── readme-update.md       # README.md 구조 최신화 자동화
 ```
 
 ## 새 자동화 추가 시
@@ -28,4 +30,4 @@ automation/
 
 ---
 
-*마지막 업데이트: 2026년 2월 1일*
+*마지막 업데이트: 2026년 2월 11일*
