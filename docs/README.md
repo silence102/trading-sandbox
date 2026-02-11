@@ -11,7 +11,8 @@ docs/
 │   ├── api-comparison.md  # 증권사 API 비교
 │   ├── trading-systems.md # HTS/MTS/WTS 비교
 │   ├── github-issue-guide.md # GitHub Issue 가이드
-│   └── structured-outputs-guide.md # OpenAI Structured Outputs 활용
+│   ├── structured-outputs-guide.md # OpenAI Structured Outputs 활용
+│   └── claude-code-skills-guide.md # Claude Code Skills 생태계 인사이트
 └── references/            # ⚠️ 참고 자료 및 주의사항
     └── pykrx-notice.md    # PyKRX 면책 및 저작권
 ```
@@ -33,6 +34,8 @@ docs/
 | [trading-systems.md](learning/trading-systems.md) | HTS/MTS/WTS 개념 및 비교 |
 | [github-issue-guide.md](learning/github-issue-guide.md) | GitHub Issue 활용 가이드 |
 | [structured-outputs-guide.md](learning/structured-outputs-guide.md) | OpenAI Structured Outputs 활용 가이드 |
+| [claude-code-skills-guide.md](learning/claude-code-skills-guide.md) | Claude Code Skills 생태계 및 프로젝트 적용 인사이트 |
+| [claude-opus4-agent-teams.md](learning/claude-opus4-agent-teams.md) | Claude Opus 4.6 & Agent Teams 핵심 정리 |
 
 ## references/ - 참고 자료
 
@@ -42,4 +45,4 @@ docs/
 
 ---
 
-*마지막 업데이트: 2026년 2월 10일*
+*마지막 업데이트: 2026년 2월 11일*

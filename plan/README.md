@@ -10,6 +10,7 @@
 | [ipo-system.md](ipo-system.md) | 공모주 일정 및 투자 자동화 | 📝 계획 중 |
 | [pain-points-improvement.md](pain-points-improvement.md) | 투자 불편 사항 개선 | 📝 계획 중 |
 | [kis-api-customization.md](kis-api-customization.md) | 증권사 API 커스터마이징 | 📝 계획 중 |
+| [skills-insight-application.md](skills-insight-application.md) | Claude Code Skills 인사이트 적용 계획 | 📝 계획 중 |
 
 ## 상태 표기
 
@@ -22,4 +23,4 @@
 
 ---
 
-*마지막 업데이트: 2026년 2월 4일*
+*마지막 업데이트: 2026년 2월 11일*
