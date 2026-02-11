@@ -180,14 +180,24 @@ class KrxCollector:
 
             if ohlcv:
                 latest = ohlcv[-1] if ohlcv else {}
+                prev = ohlcv[-2] if len(ohlcv) > 1 else None
                 name = self.get_ticker_name(ticker)
+
+                close = latest.get("종가", 0)
+                prev_close = prev.get("종가", close) if prev else close
+                change_amt = close - prev_close
+                change_pct = latest.get("등락률", ((close / prev_close - 1) * 100) if prev_close else 0)
 
                 results.append({
                     "ticker": ticker,
                     "name": name,
                     "date": latest.get("날짜", ""),
-                    "close": latest.get("종가", 0),
-                    "change": latest.get("등락률", 0) if "등락률" in latest else 0,
+                    "open": latest.get("시가", 0),
+                    "high": latest.get("고가", 0),
+                    "low": latest.get("저가", 0),
+                    "close": close,
+                    "change_amt": change_amt,
+                    "change_pct": change_pct,
                     "volume": latest.get("거래량", 0),
                 })
 
@@ -276,9 +286,15 @@ class KrxCollector:
         if watchlist:
             lines.append("\n### 관심 종목")
             for item in watchlist:
+                change_amt = item.get("change_amt", 0)
+                change_pct = item.get("change_pct", 0)
+                sign = "+" if change_amt >= 0 else ""
+                high = item.get("high", 0)
+                low = item.get("low", 0)
                 lines.append(
                     f"- **{item['name']}** ({item['ticker']}): "
-                    f"{item['close']:,}원 (거래량: {item['volume']:,})"
+                    f"{item['close']:,}원 ({sign}{change_amt:,}, {sign}{change_pct:.2f}%) "
+                    f"| 고가 {high:,} / 저가 {low:,} | 거래량: {item['volume']:,}"
                 )
 
         return "\n".join(lines)

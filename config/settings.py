@@ -20,7 +20,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # AI 분석 설정
 AI_ENABLED = os.getenv("AI_ENABLED", "false").lower() == "true"
 AI_MODEL = "gpt-4o-mini"  # 비용 효율적 모델 (변경 가능: gpt-4o, gpt-4-turbo 등)
-AI_MAX_TOKENS = 1500
+AI_MAX_TOKENS = 2500
 AI_TEMPERATURE = 0.3  # 낮을수록 일관된 분석, 높을수록 창의적
 
 # 관심 종목 리스트
@@ -50,6 +50,15 @@ BRIEFING_SETTINGS = {
         "title": "모닝 브리핑",
         "file_suffix": "모닝브리핑",
         "description": "장 시작 전 투자 준비",
+    },
+    "midday": {
+        "max_disclosures": 20,
+        "max_news": 10,
+        "news_max_hours": 6,        # 당일 오전 ~ 오후 초반 뉴스
+        "days_back": 0,             # 당일 데이터
+        "title": "미드데이 브리핑",
+        "file_suffix": "미드데이브리핑",
+        "description": "장중 시장 점검",
     },
     "aftermarket": {
         "max_disclosures": 20,

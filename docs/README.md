@@ -10,7 +10,8 @@ docs/
 ├── learning/              # 📖 학습 자료
 │   ├── api-comparison.md  # 증권사 API 비교
 │   ├── trading-systems.md # HTS/MTS/WTS 비교
-│   └── github-issue-guide.md # GitHub Issue 가이드
+│   ├── github-issue-guide.md # GitHub Issue 가이드
+│   └── structured-outputs-guide.md # OpenAI Structured Outputs 활용
 └── references/            # ⚠️ 참고 자료 및 주의사항
     └── pykrx-notice.md    # PyKRX 면책 및 저작권
 ```
@@ -31,6 +32,7 @@ docs/
 | [api-comparison.md](learning/api-comparison.md) | 한국투자증권 vs 키움증권 API 비교 |
 | [trading-systems.md](learning/trading-systems.md) | HTS/MTS/WTS 개념 및 비교 |
 | [github-issue-guide.md](learning/github-issue-guide.md) | GitHub Issue 활용 가이드 |
+| [structured-outputs-guide.md](learning/structured-outputs-guide.md) | OpenAI Structured Outputs 활용 가이드 |
 
 ## references/ - 참고 자료
 
@@ -40,4 +42,4 @@ docs/
 
 ---
 
-*마지막 업데이트: 2026년 2월 4일*
+*마지막 업데이트: 2026년 2월 10일*

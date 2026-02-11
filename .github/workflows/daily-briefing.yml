@@ -1,6 +1,7 @@
 # 일일 마켓 브리핑 자동 생성 워크플로우
 #
 # 모닝 브리핑 (08:00 KST): 장 시작 전 투자 준비
+# 미드데이 브리핑 (12:30 KST): 장중 시장 점검
 # 애프터 마켓 브리핑 (18:00 KST): 장 마감 후 시장 요약
 #
 # 사용법:
@@ -16,6 +17,7 @@ on:
   # 스케줄 실행 (UTC 기준, 한국시간 -9시간)
   schedule:
     - cron: '0 23 * * 0-4'  # UTC 23:00 = KST 08:00 (모닝, 일~목 → 월~금)
+    - cron: '30 3 * * 1-5'  # UTC 03:30 = KST 12:30 (미드데이, 월~금)
     - cron: '0 9 * * 1-5'   # UTC 09:00 = KST 18:00 (애프터마켓, 월~금)
 
   # 수동 실행 허용
@@ -36,6 +38,7 @@ on:
         type: choice
         options:
           - 'morning'
+          - 'midday'
           - 'aftermarket'
 
 jobs:
@@ -73,9 +76,12 @@ jobs:
           fi
           # 스케줄: KST 시간으로 자동 판단
           KST_HOUR=$(TZ='Asia/Seoul' date +'%H')
-          if [ "$KST_HOUR" -lt "12" ]; then
+          if [ "$KST_HOUR" -lt "10" ]; then
             echo "briefing_type=morning" >> $GITHUB_OUTPUT
             echo "모닝 브리핑 (KST $KST_HOUR시)"
+          elif [ "$KST_HOUR" -lt "15" ]; then
+            echo "briefing_type=midday" >> $GITHUB_OUTPUT
+            echo "미드데이 브리핑 (KST $KST_HOUR시)"
           else
             echo "briefing_type=aftermarket" >> $GITHUB_OUTPUT
             echo "애프터 마켓 브리핑 (KST $KST_HOUR시)"
@@ -123,6 +129,8 @@ jobs:
           BTYPE="${{ needs.check-enabled.outputs.briefing_type }}"
           if [ "$BTYPE" == "morning" ]; then
             MSG="docs: 모닝 브리핑 자동 생성 (${{ steps.date.outputs.date }})"
+          elif [ "$BTYPE" == "midday" ]; then
+            MSG="docs: 미드데이 브리핑 자동 생성 (${{ steps.date.outputs.date }})"
           else
             MSG="docs: 애프터 마켓 브리핑 자동 생성 (${{ steps.date.outputs.date }})"
           fi

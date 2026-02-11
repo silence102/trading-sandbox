@@ -6,11 +6,14 @@
     # 모닝 브리핑 생성 (장 시작 전)
     python main.py --type morning
 
+    # 미드데이 브리핑 생성 (장중)
+    python main.py --type midday
+
     # 애프터 마켓 브리핑 생성 (장 마감 후, 기본값)
     python main.py --type aftermarket
     python main.py
 
-    # 스케줄러로 자동 실행 (08:00 모닝, 18:00 애프터마켓)
+    # 스케줄러로 자동 실행 (08:00 모닝, 12:30 미드데이, 18:00 애프터마켓)
     python main.py --schedule
 
     # 개별 수집기 테스트
@@ -38,7 +41,7 @@ def run_briefing(briefing_type: str = "aftermarket", use_ai: bool = False):
 
 
 def run_scheduler():
-    """스케줄러로 자동 실행 (모닝 08:00, 애프터마켓 18:00)"""
+    """스케줄러로 자동 실행 (모닝 08:00, 미드데이 12:30, 애프터마켓 18:00)"""
     try:
         import schedule
         import time
@@ -51,16 +54,22 @@ def run_scheduler():
         print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 모닝 브리핑 생성 시작...")
         run_briefing(briefing_type="morning")
 
+    def midday_job():
+        print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 미드데이 브리핑 생성 시작...")
+        run_briefing(briefing_type="midday")
+
     def aftermarket_job():
         print(f"\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] 애프터 마켓 브리핑 생성 시작...")
         run_briefing(briefing_type="aftermarket")
 
-    # 매일 08:00 모닝, 18:00 애프터마켓
+    # 매일 08:00 모닝, 12:30 미드데이, 18:00 애프터마켓
     schedule.every().day.at("08:00").do(morning_job)
+    schedule.every().day.at("12:30").do(midday_job)
     schedule.every().day.at("18:00").do(aftermarket_job)
 
     print("스케줄러 시작")
     print("  - 08:00 모닝 브리핑")
+    print("  - 12:30 미드데이 브리핑")
     print("  - 18:00 애프터 마켓 브리핑")
     print("종료하려면 Ctrl+C를 누르세요.\n")
 
@@ -164,8 +173,9 @@ def main():
 예시:
   python main.py                          애프터 마켓 브리핑 생성 (기본)
   python main.py --type morning           모닝 브리핑 생성
+  python main.py --type midday            미드데이 브리핑 생성
   python main.py --type aftermarket       애프터 마켓 브리핑 생성
-  python main.py --type morning --ai      AI 분석 포함 모닝 브리핑
+  python main.py --type midday --ai       AI 분석 포함 미드데이 브리핑
   python main.py --schedule               스케줄러로 자동 실행
   python main.py --test dart              DART 수집기 테스트
   python main.py --status                 현재 설정 상태 확인
@@ -175,9 +185,9 @@ def main():
     parser.add_argument(
         "--type",
         type=str,
-        choices=["morning", "aftermarket"],
+        choices=["morning", "midday", "aftermarket"],
         default="aftermarket",
-        help="브리핑 유형: morning(모닝) 또는 aftermarket(애프터마켓, 기본값)"
+        help="브리핑 유형: morning(모닝), midday(미드데이), aftermarket(애프터마켓, 기본값)"
     )
     parser.add_argument(
         "--ai",
