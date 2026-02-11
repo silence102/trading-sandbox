@@ -7,6 +7,8 @@
 - 애프터 마켓 브리핑 (18:00): 금일 시장 동향, 공시, 오후 뉴스
 """
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional
@@ -66,6 +68,7 @@ AI_MORNING_PROMPT = """아래는 오늘 모닝 브리핑을 위해 수집된 시
 4. **오늘 전략**
    - 시장 색깔에 맞는 대응 전략 2~3가지
 
+작성 시 반드시 준수: 수치 없는 평가 문장 금지, ±3% 이상 종목은 원인 분석 포함
 간결하게 핵심만 작성해주세요."""
 
 AI_MIDDAY_PROMPT = """아래는 오늘 미드데이 브리핑을 위해 수집된 장중 시장 데이터입니다.
@@ -90,6 +93,7 @@ AI_MIDDAY_PROMPT = """아래는 오늘 미드데이 브리핑을 위해 수집�
 4. **오후장 전망**
    - 후장에 주목할 포인트와 시나리오 2가지(상승/하락 시 대응)
 
+작성 시 반드시 준수: 수치 없는 평가 문장 금지, ±3% 이상 종목은 원인 분석 포함
 간결하게 핵심만 작성해주세요."""
 
 AI_AFTERMARKET_PROMPT = """아래는 오늘 애프터 마켓 브리핑을 위해 수집된 시장 데이터입니다.
@@ -131,7 +135,7 @@ class BriefingGenerator:
 
     def collect_all_data(self, briefing_type: str = "aftermarket") -> dict:
         """
-        모든 데이터 수집
+        모든 데이터 수집 (ThreadPoolExecutor 병렬 실행)
 
         Args:
             briefing_type: "morning", "midday", 또는 "aftermarket"
@@ -155,54 +159,68 @@ class BriefingGenerator:
             krx_target_date = datetime.now().strftime("%Y%m%d")
 
         dart_days_back = settings["days_back"]
+        news_hours = settings["news_max_hours"]
+        max_news = settings["max_news"]
 
-        # DART 공시
-        print("  - DART 공시 수집 중...")
-        if self.dart.is_available():
+        # 각 collector를 내부 함수로 분리
+        def fetch_dart():
+            if not self.dart.is_available():
+                return {"formatted": "DART API 키가 설정되지 않았습니다."}
             disclosures = self.dart.get_recent_disclosures(days_back=dart_days_back)
             watchlist_disc = self.dart.get_watchlist_disclosures(days_back=dart_days_back)
-            data["sections"]["dart"] = {
+            return {
                 "all_disclosures": len(disclosures),
                 "watchlist_disclosures": watchlist_disc,
                 "formatted": self.dart.format_for_briefing(watchlist_disc)
             }
-        else:
-            data["sections"]["dart"] = {"formatted": "DART API 키가 설정되지 않았습니다."}
 
-        # KRX 시세
-        print("  - KRX 시세 수집 중...")
-        if self.krx.is_available():
-            data["sections"]["krx"] = {
+        def fetch_krx():
+            if not self.krx.is_available():
+                return {"formatted": "PyKRX가 설치되지 않았습니다."}
+            return {
                 "market_summary": self.krx.get_market_summary(target_date=krx_target_date),
                 "watchlist": self.krx.get_watchlist_data(target_date=krx_target_date),
                 "formatted": self.krx.format_for_briefing(target_date=krx_target_date)
             }
-        else:
-            data["sections"]["krx"] = {"formatted": "PyKRX가 설치되지 않았습니다."}
 
-        # ECOS 경제지표
-        print("  - ECOS 경제지표 수집 중...")
-        if self.ecos.is_available():
-            data["sections"]["ecos"] = {
+        def fetch_ecos():
+            if not self.ecos.is_available():
+                return {"formatted": "ECOS API 키가 설정되지 않았습니다."}
+            return {
                 "indicators": self.ecos.get_latest_indicators(),
                 "formatted": self.ecos.format_for_briefing()
             }
-        else:
-            data["sections"]["ecos"] = {"formatted": "ECOS API 키가 설정되지 않았습니다."}
 
-        # 뉴스
-        print("  - 뉴스 RSS 수집 중...")
-        if self.news.is_available():
-            news_hours = settings["news_max_hours"]
-            max_news = settings["max_news"]
+        def fetch_news():
+            if not self.news.is_available():
+                return {"formatted": "feedparser가 설치되지 않았습니다."}
             news_items = self.news.get_investment_news(max_hours=news_hours)
-            data["sections"]["news"] = {
+            return {
                 "count": len(news_items),
                 "items": news_items[:max_news],
                 "formatted": self.news.format_for_briefing(max_news, max_hours=news_hours)
             }
-        else:
-            data["sections"]["news"] = {"formatted": "feedparser가 설치되지 않았습니다."}
+
+        tasks = {
+            "dart": fetch_dart,
+            "krx": fetch_krx,
+            "ecos": fetch_ecos,
+            "news": fetch_news,
+        }
+
+        print("  - 데이터 수집 중 (병렬)...")
+        start = time.time()
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = {key: executor.submit(fn) for key, fn in tasks.items()}
+            for key, future in futures.items():
+                try:
+                    data["sections"][key] = future.result(timeout=30)
+                except Exception as e:
+                    print(f"  [경고] {key} 수집 실패: {e}")
+                    data["sections"][key] = {"formatted": f"## {key} 데이터 수집 실패\n수집 중 오류가 발생했습니다."}
+
+        elapsed = time.time() - start
+        print(f"  [수집 완료] {elapsed:.1f}초 소요")
 
         return data
 

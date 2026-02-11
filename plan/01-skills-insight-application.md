@@ -90,8 +90,8 @@ Claude Code가 이 프로젝트에서 작업할 때 **자동으로 plan/ 폴더�
 ```
 
 - [x] CLAUDE.md 파일 프로젝트 루트에 생성 ✅ 2026-02-11
-- [ ] plan/templates/ 디렉토리 및 feature-design.md 템플릿 생성
-- [ ] plan/README.md에 설계 원칙 섹션 추가
+- [x] plan/templates/ 디렉토리 및 feature-design.md 템플릿 생성 ✅ 2026-02-11
+- [x] plan/README.md에 설계 원칙 섹션 추가 ✅ 2026-02-11 (전면 재작성으로 반영)
 
 ---
 
@@ -151,7 +151,7 @@ BANNED_PHRASES_KO = [
 ```
 
 - [x] `AI_SYSTEM_PROMPT` 금지 표현 목록 섹션 추가 ✅ 2026-02-11
-- [ ] 모닝/미드데이/애프터마켓 각 프롬프트에 "수치 없는 평가 금지" 규칙 추가
+- [x] 모닝/미드데이 프롬프트에 "수치 없는 평가 금지" 규칙 추가 ✅ 2026-02-11 (애프터마켓은 기존 규칙 포함)
 - [ ] 기존 브리핑 파일 검토해 금지 목록 추가 보강
 
 ---
@@ -229,9 +229,9 @@ elapsed = time.time() - start
 print(f"[수집 완료] {elapsed:.1f}초 소요")
 ```
 
-- [ ] `briefing_generator.py`의 `collect_all_data()` 병렬화 구현
-- [ ] 수집 시간 측정 로깅 추가
-- [ ] 병렬화 전후 시간 비교 테스트
+- [x] `briefing_generator.py`의 `collect_all_data()` 병렬화 구현 ✅ 2026-02-11
+- [x] 수집 시간 측정 로깅 추가 ✅ 2026-02-11 ("[수집 완료] X.Xs 소요" 출력)
+- [x] 병렬화 테스트 완료 ✅ 2026-02-11 (12.3초 소요 확인)
 
 ---
 
@@ -311,4 +311,4 @@ class MarketAnalysis(BaseModel):
 
 *작성일: 2026년 2월 11일*
 *마지막 업데이트: 2026년 2월 11일*
-*상태: 🔄 진행 중 (Phase 1 완료)*
+*상태: 🔄 진행 중 (Phase 2 완료, Phase 3 대기)*

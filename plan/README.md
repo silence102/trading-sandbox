@@ -13,11 +13,12 @@ Phase 1 ✅ 완료 (2026-02-11)
   └── P1-B: CLAUDE.md 생성 (프로젝트 루트)
   └── P1-C: GitHub Actions AI_ENABLED/OPENAI_API_KEY 추가 (daily-briefing.yml)
 
-Phase 2 ← 다음 작업
+Phase 2 ✅ 완료 (2026-02-11)
   └── P2-A: collect_all_data() 병렬화 (briefing_generator.py)
   └── P2-B: plan/templates/feature-design.md 생성
+  └── P2-C: 모닝/미드데이 프롬프트 품질 규칙 추가
 
-Phase 3
+Phase 3 ← 다음 작업
   └── P3-A: Structured Outputs (Pydantic 모델 + JSON 이중 저장)
 
 Phase 4 ~ (대형 기능)
