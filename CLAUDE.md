@@ -12,6 +12,30 @@
 4. 수정 완료 후 관련 `docs/` 문서 업데이트
 5. GitHub 커밋
 
+## 커밋 컨벤션 (반드시 준수)
+
+모든 커밋 메시지는 **type prefix**로 시작해야 합니다.
+
+| type | 사용 상황 |
+|------|---------|
+| `feat:` | 새 기능 추가 |
+| `fix:` | 버그 수정 |
+| `docs:` | 문서 추가/수정 (plan/, docs/, notes/, README 등) |
+| `refactor:` | 기능 변경 없는 코드 구조 개선 |
+| `chore:` | 설정 파일, 의존성, CI/CD 변경 |
+
+**형식 예시:**
+```
+docs: pain points 기록 — 2026년 1월 실전 투자 경험
+feat: collect_all_data() 병렬화 구현
+fix: ECOS GBP 환율 item code 수정
+chore: GitHub Actions .env에 AI_ENABLED 추가
+```
+
+**금지:**
+- prefix 없는 커밋 메시지 (`Phase 1 완료...`, `plan 파일명 수정...` 등)
+- 영어/한국어 혼용 prefix (`docs:` 뒤 영어 본문은 허용)
+
 ## 금지 사항
 
 - `plan/` 없이 100줄 이상의 코드 변경 금지
@@ -67,11 +91,11 @@ notes/daily_briefing/YYYY-MM-DD_XX브리핑.md 저장
 
 | 파일 | 주제 | 상태 |
 |------|------|------|
-| `plan/daily-briefing-expansion.md` | 일일 브리핑 자동화 확장 | 🔄 진행 중 |
-| `plan/skills-insight-application.md` | Skills 인사이트 적용 | 🔄 진행 중 |
-| `plan/ipo-system.md` | 공모주 일정 자동화 | 📝 계획 중 |
-| `plan/pain-points-improvement.md` | 투자 불편 사항 개선 | 📝 계획 중 |
-| `plan/kis-api-customization.md` | 증권사 API 커스터마이징 | 📝 계획 중 |
+| `plan/01-skills-insight-application.md` | Skills 인사이트 적용 | 🔄 진행 중 |
+| `plan/02-daily-briefing-expansion.md` | 일일 브리핑 자동화 확장 | 🔄 진행 중 |
+| `plan/03-ipo-system.md` | 공모주 일정 자동화 | 📝 계획 중 |
+| `plan/04-kis-api-customization.md` | 증권사 API 커스터마이징 | 📝 계획 중 |
+| `plan/05-pain-points-improvement.md` | 투자 불편 사항 개선 | 🔄 진행 중 |
 
 ---
 
