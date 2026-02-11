@@ -304,8 +304,8 @@ class MarketAnalysis(BaseModel):
 
 | 연계 계획 파일 | 관련 항목 |
 |-------------|---------|
-| [daily-briefing-expansion.md](daily-briefing-expansion.md) | 알림 시스템 → Structured Outputs 선행 필요 |
-| [pain-points-improvement.md](pain-points-improvement.md) | AI 분석 품질 → Humanizer 방식으로 개선 |
+| [02-daily-briefing-expansion.md](02-daily-briefing-expansion.md) | 알림 시스템 → Structured Outputs 선행 필요 |
+| [05-pain-points-improvement.md](05-pain-points-improvement.md) | AI 분석 품질 → Humanizer 방식으로 개선 |
 
 ---
 

@@ -55,10 +55,10 @@ Phase 4 ~ (대형 기능)
 
 | # | 항목 | 파일 | 난이도 | 참고 |
 |---|------|------|--------|------|
-| 8 | 해외 증시 데이터 수집 모듈 | `scripts/collectors/global_market.py` | 높음 | [daily-briefing-expansion.md](daily-briefing-expansion.md) |
-| 9 | 섹터별 자금 흐름 / 수급 분석 | `scripts/collectors/sector_analysis.py` | 높음 | [daily-briefing-expansion.md](daily-briefing-expansion.md) |
+| 8 | 해외 증시 데이터 수집 모듈 | `scripts/collectors/global_market.py` | 높음 | [02-daily-briefing-expansion.md](02-daily-briefing-expansion.md) |
+| 9 | 섹터별 자금 흐름 / 수급 분석 | `scripts/collectors/sector_analysis.py` | 높음 | [02-daily-briefing-expansion.md](02-daily-briefing-expansion.md) |
 | 10 | 급등/급락 알림 시스템 | `scripts/briefing_generator.py` | 중간 | P3-A 선행 필요 |
-| 11 | 주간 트렌드 분석 | `scripts/briefing_generator.py` | 중간 | [daily-briefing-expansion.md](daily-briefing-expansion.md) |
+| 11 | 주간 트렌드 분석 | `scripts/briefing_generator.py` | 중간 | [02-daily-briefing-expansion.md](02-daily-briefing-expansion.md) |
 
 ---
 
@@ -66,9 +66,9 @@ Phase 4 ~ (대형 기능)
 
 | # | 항목 | 파일 | 난이도 | 참고 |
 |---|------|------|--------|------|
-| 12 | 공모주 일정 수집 및 알림 | `scripts/collectors/ipo_collector.py` | 높음 | [ipo-system.md](ipo-system.md) |
-| 13 | KIS API 계좌/잔고 조회 | `scripts/kis/` (신규 디렉토리) | 높음 | [kis-api-customization.md](kis-api-customization.md) |
-| 14 | KIS API 조건부 주문 / 손절·익절 자동화 | `scripts/kis/` | 매우 높음 | [kis-api-customization.md](kis-api-customization.md) |
+| 12 | 공모주 일정 수집 및 알림 | `scripts/collectors/ipo_collector.py` | 높음 | [03-ipo-system.md](03-ipo-system.md) |
+| 13 | KIS API 계좌/잔고 조회 | `scripts/kis/` (신규 디렉토리) | 높음 | [04-kis-api-customization.md](04-kis-api-customization.md) |
+| 14 | KIS API 조건부 주문 / 손절·익절 자동화 | `scripts/kis/` | 매우 높음 | [04-kis-api-customization.md](04-kis-api-customization.md) |
 
 ---
 
@@ -76,7 +76,7 @@ Phase 4 ~ (대형 기능)
 
 | # | 항목 | 파일 | 비고 |
 |---|------|------|------|
-| 15 | 투자 불편 사항 직접 기록 후 개선 | [pain-points-improvement.md](pain-points-improvement.md) | 항목 아직 없음 — 사용 중 발견 시 추가 |
+| 15 | 투자 불편 사항 직접 기록 후 개선 | [05-pain-points-improvement.md](05-pain-points-improvement.md) | 항목 아직 없음 — 사용 중 발견 시 추가 |
 
 ---
 
@@ -241,11 +241,11 @@ notes/daily_briefing/
 
 | 파일 | 주제 | 상태 |
 |------|------|------|
-| [skills-insight-application.md](skills-insight-application.md) | Skills 인사이트 적용 (Phase 1 완료) | 🔄 진행 중 |
-| [daily-briefing-expansion.md](daily-briefing-expansion.md) | 일일 브리핑 자동화 확장 | 🔄 진행 중 |
-| [ipo-system.md](ipo-system.md) | 공모주 일정 및 투자 자동화 | 📝 계획 중 |
-| [pain-points-improvement.md](pain-points-improvement.md) | 투자 불편 사항 개선 | 📝 계획 중 |
-| [kis-api-customization.md](kis-api-customization.md) | 증권사 API 커스터마이징 (자동매매) | 📝 계획 중 |
+| [01-skills-insight-application.md](01-skills-insight-application.md) | Skills 인사이트 적용 (Phase 1 완료) | 🔄 진행 중 |
+| [02-daily-briefing-expansion.md](02-daily-briefing-expansion.md) | 일일 브리핑 자동화 확장 | 🔄 진행 중 |
+| [03-ipo-system.md](03-ipo-system.md) | 공모주 일정 및 투자 자동화 | 📝 계획 중 |
+| [04-kis-api-customization.md](04-kis-api-customization.md) | 증권사 API 커스터마이징 (자동매매) | 📝 계획 중 |
+| [05-pain-points-improvement.md](05-pain-points-improvement.md) | 투자 불편 사항 개선 | 📝 계획 중 |
 
 ## 상태 표기
 
