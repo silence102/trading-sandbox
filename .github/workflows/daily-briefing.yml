@@ -110,7 +110,9 @@ jobs:
         run: |
           echo "DART_API_KEY=${{ secrets.DART_API_KEY }}" >> .env
           echo "ECOS_API_KEY=${{ secrets.ECOS_API_KEY }}" >> .env
-          echo "WATCHLIST_STOCKS=005930,000660,016360,316140,003230" >> .env
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          echo "WATCHLIST_STOCKS=005930,000660,016360,316140,003230,161390,002790" >> .env
+          echo "AI_ENABLED=${{ vars.AI_ENABLED || 'false' }}" >> .env
 
       - name: Generate market briefing
         run: |

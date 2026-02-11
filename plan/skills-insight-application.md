@@ -89,7 +89,7 @@ Claude Code가 이 프로젝트에서 작업할 때 **자동으로 plan/ 폴더�
 ## 롤백 방법
 ```
 
-- [ ] CLAUDE.md 파일 프로젝트 루트에 생성
+- [x] CLAUDE.md 파일 프로젝트 루트에 생성 ✅ 2026-02-11
 - [ ] plan/templates/ 디렉토리 및 feature-design.md 템플릿 생성
 - [ ] plan/README.md에 설계 원칙 섹션 추가
 
@@ -150,7 +150,7 @@ BANNED_PHRASES_KO = [
 ]
 ```
 
-- [ ] `AI_SYSTEM_PROMPT` 금지 표현 목록 섹션 추가
+- [x] `AI_SYSTEM_PROMPT` 금지 표현 목록 섹션 추가 ✅ 2026-02-11
 - [ ] 모닝/미드데이/애프터마켓 각 프롬프트에 "수치 없는 평가 금지" 규칙 추가
 - [ ] 기존 브리핑 파일 검토해 금지 목록 추가 보강
 
@@ -310,4 +310,5 @@ class MarketAnalysis(BaseModel):
 ---
 
 *작성일: 2026년 2월 11일*
-*상태: 📝 계획 중*
+*마지막 업데이트: 2026년 2월 11일*
+*상태: 🔄 진행 중 (Phase 1 완료)*
